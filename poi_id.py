@@ -134,7 +134,7 @@ for i, clf in enumerate(classifiers):
 plt.legend(names)
 plt.title('Step 1')
     
-    
+print '-------------------------------------------------------------------------------'    
 
 #%% Step 2: Add PCA
 
@@ -176,6 +176,8 @@ for i, classifier in enumerate(classifiers):
 plt.legend(names)
 plt.title('Step 2')
 
+print '-------------------------------------------------------------------------------'
+
 #%% Step 3: Add GridSearchCV
 
 parameters = [
@@ -212,7 +214,7 @@ for i, classifier in enumerate(classifiers):
     
     sss = StratifiedShuffleSplit(random_state=random_state)
     
-    clf = GridSearchCV(pipe, parameters[i], scoring='f1')
+    clf = GridSearchCV(pipe, parameters[i], scoring='f1', cv=sss)
     
     clf.fit(features_train, labels_train)
     
