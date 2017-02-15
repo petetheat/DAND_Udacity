@@ -193,7 +193,7 @@ parameters = [
              pca__n_components=range(1, len(features_list)-1)),
         dict(CLF__C = [1, 5, 10, 100], 
              CLF__gamma = [1, 10, 100, 1000], 
-             CLF__random_state = [42],
+             CLF__random_state = [random_state],
              pca__n_components=range(1, len(features_list)-1))
         ]
 
