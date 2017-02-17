@@ -15,7 +15,7 @@ import seaborn as sns
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV # for sklearn 0.18
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -105,76 +105,76 @@ random_state = 42
 classifiers = [
         GaussianNB(),
         KNeighborsClassifier(),
-        DecisionTreeClassifier(),
-        RandomForestClassifier(),
-        SVC()]
+        DecisionTreeClassifier()]#,
+        #RandomForestClassifier(),
+        #SVC()]
 
 names = ['GaussianNB', 'KNearestNeighbors', 'Decision Tree', 'Random Forest', 'Support Vector Classifier']
-
-plt.figure(figsize=(10,5))
-
-for i, clf in enumerate(classifiers):
-    print 'Step 1: ', i, names[i]
-    
-    clf.fit(features_train, labels_train)
-       
-    pred = clf.predict(features_test)
-    precision, recall, thresholds = precision_recall_curve(labels_test, pred)
-    
-    print "Precision: ", precision_score(labels_test, pred)
-    print "Recall:    ", recall_score(labels_test, pred)
-    print "F1:        ", f1_score(labels_test, pred)
-    
-    plt.plot(recall, precision,'o-')
-    
-    test_classifier(clf, my_dataset, features_list)
-    
-    print 'done...'
-
-plt.legend(names)
-plt.title('Step 1')
+#
+#plt.figure(figsize=(10,5))
+#
+#for i, clf in enumerate(classifiers):
+#    print 'Step 1: ', i, names[i]
+#    
+#    clf.fit(features_train, labels_train)
+#       
+#    pred = clf.predict(features_test)
+#    precision, recall, thresholds = precision_recall_curve(labels_test, pred)
+#    
+#    print "Precision: ", precision_score(labels_test, pred)
+#    print "Recall:    ", recall_score(labels_test, pred)
+#    print "F1:        ", f1_score(labels_test, pred)
+#    
+#    plt.plot(recall, precision,'o-')
+#    
+#    test_classifier(clf, my_dataset, features_list)
+#    
+#    print 'done...'
+#
+#plt.legend(names)
+#plt.title('Step 1')
     
 print '-------------------------------------------------------------------------------'    
 
 #%% Step 2: Add PCA
 
-parameters = dict(pca__n_components=range(1, len(features_list)-1))
-
-plt.figure(figsize=(10,5))
-
-for i, classifier in enumerate(classifiers):
-    print 'Step 2: ', i, names[i]
-    
-    if (i==0) | (i==1) | (i==4):
-        estim = [('scaler', MinMaxScaler()), ('pca', PCA()), ('CLF', classifier)]
-    else:
-        # No scaler for decision tree or random forest
-        estim = [('pca', PCA()), ('CLF', classifier)]
-    pipe = Pipeline(estim) 
-    
-    sss = StratifiedShuffleSplit(random_state=random_state)
-    
-    clf = GridSearchCV(pipe, parameters, scoring='f1')
-    
-    clf.fit(features_train, labels_train)
-    
-    clf = clf.best_estimator_
-    
-    pred = clf.predict(features_test)
-    precision, recall, thresholds = precision_recall_curve(labels_test, pred)
-    
-    print "Precision: ", precision_score(labels_test, pred)
-    print "Recall:    ", recall_score(labels_test, pred)
-    print "F1:        ", f1_score(labels_test, pred)
-    
-    plt.plot(recall, precision,'o-')
-    
-    test_classifier(clf, my_dataset, features_list)
-    
-    print 'done...'
-
-plt.legend(names)
-plt.title('Step 2')
+#parameters = dict(pca__n_components=range(1, len(features_list)-1))
+#
+#plt.figure(figsize=(10,5))
+#
+#for i, classifier in enumerate(classifiers):
+#    print 'Step 2: ', i, names[i]
+#    
+#    if (i==0) | (i==1) | (i==4):
+#        estim = [('scaler', MinMaxScaler()), ('pca', PCA()), ('CLF', classifier)]
+#    else:
+#        # No scaler for decision tree or random forest
+#        estim = [('pca', PCA()), ('CLF', classifier)]
+#    pipe = Pipeline(estim) 
+#    
+#    sss = StratifiedShuffleSplit(random_state=random_state)
+#    
+#    clf = GridSearchCV(pipe, parameters, scoring='f1')
+#    
+#    clf.fit(features_train, labels_train)
+#    
+#    clf = clf.best_estimator_
+#    
+#    pred = clf.predict(features_test)
+#    precision, recall, thresholds = precision_recall_curve(labels_test, pred)
+#    
+#    print "Precision: ", precision_score(labels_test, pred)
+#    print "Recall:    ", recall_score(labels_test, pred)
+#    print "F1:        ", f1_score(labels_test, pred)
+#    
+#    plt.plot(recall, precision,'o-')
+#    
+#    test_classifier(clf, my_dataset, features_list)
+#    
+#    print 'done...'
+#
+#plt.legend(names)
+#plt.title('Step 2')
 
 print '-------------------------------------------------------------------------------'
 
@@ -187,16 +187,16 @@ parameters = [
         dict(CLF__criterion = ['gini', 'entropy'], 
              CLF__min_samples_split = [2, 4, 10, 20], 
              CLF__random_state = [random_state],
-             pca__n_components=range(1, len(features_list)-1)),
-        dict(CLF__criterion = ['gini', 'entropy'], 
-             CLF__n_estimators = [5, 8, 10, 12, 25], 
-             CLF__min_samples_split = [2, 4, 10, 20], 
-             CLF__random_state = [random_state],
-             pca__n_components=range(1, len(features_list)-1)),
-        dict(CLF__C = [1, 5, 10, 100], 
-             CLF__gamma = [1, 10, 100, 1000], 
-             CLF__random_state = [random_state],
-             pca__n_components=range(1, len(features_list)-1))
+             pca__n_components=range(1, len(features_list)-1))#,
+#        dict(CLF__criterion = ['gini', 'entropy'], 
+#             CLF__n_estimators = [5, 8, 10, 12, 25], 
+#             CLF__min_samples_split = [2, 4, 10, 20], 
+#             CLF__random_state = [random_state],
+#             pca__n_components=range(1, len(features_list)-1)),
+#        dict(CLF__C = [1, 5, 10, 100], 
+#             CLF__gamma = [1, 10, 100, 1000], 
+#             CLF__random_state = [random_state],
+#             pca__n_components=range(1, len(features_list)-1))
         ]
 
 plt.figure(figsize=(10,5))
@@ -218,6 +218,7 @@ for i, classifier in enumerate(classifiers):
     
     clf.fit(features_train, labels_train)
     
+    print "CV Results: ", len(clf.cv_results_['mean_test_score']), clf.cv_results_['mean_test_score']
     clf = clf.best_estimator_
     
     pred = clf.predict(features_test)
@@ -235,6 +236,44 @@ for i, classifier in enumerate(classifiers):
 
 plt.legend(names)
 plt.title('Step 3')
+
+print '-------------------------------------------------------------------------------'
+
+#%% Step 4: Decision Tree Optimization
+
+print "Step 4: Decision Tree Optimization"
+
+
+
+classifier = DecisionTreeClassifier()
+
+parameters = dict(CLF__criterion = ['gini', 'entropy'], 
+             CLF__min_samples_split = [2, 4, 10, 20], 
+             CLF__random_state = [random_state],
+             features__pca__n_components=range(1, len(features_list)-1),
+             features__select__k=range(1,8))
+
+combined_features = FeatureUnion([('pca', PCA()), ('select', SelectKBest())])
+
+estim = [('features', combined_features), ('CLF', classifier)]
+
+pipe = Pipeline(estim) 
+    
+#sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
+sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
+    
+clf = GridSearchCV(pipe, parameters, scoring='f1', cv=sss)
+    
+clf.fit(features_train, labels_train)
+    
+clf = clf.best_estimator_
+
+pred = clf.predict(features_test)
+
+print "Precision: ", precision_score(labels_test, pred)
+print "Recall:    ", recall_score(labels_test, pred)
+print "F1:        ", f1_score(labels_test, pred)
+test_classifier(clf, my_dataset, features_list)
 
 plt.show()
 #%%
