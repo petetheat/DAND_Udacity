@@ -94,13 +94,14 @@ my_dataset = data_dict
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
+random_state = 0
 
 features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
+    train_test_split(features, labels, test_size=0.3, random_state=random_state)
 
 #%% Classifier Comparison: Step1: Classifiers with default parameters
 
-random_state = 42
+
 
 classifiers = [
         GaussianNB(),
