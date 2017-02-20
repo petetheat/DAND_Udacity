@@ -97,7 +97,7 @@ labels, features = targetFeatureSplit(data)
 random_state = 42
 
 features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.2, random_state=random_state)
+    train_test_split(features, labels, test_size=0.3, random_state=random_state)
 
 #%% Classifier Comparison: Step1: Classifiers with default parameters
 
@@ -142,99 +142,127 @@ print '-------------------------------------------------------------------------
 
 #%% Step 2: 
 
-classifier_opt = []    
+#classifier_opt = []    
+#    
+#parameters = [
+#        dict(),
+#        dict(n_neighbors= range(1,20,1),
+#             weights=['uniform', 'distance']),
+#        dict(criterion = ['gini', 'entropy'], 
+#             min_samples_split = range(10, 30, 1),
+#             min_samples_leaf = range(1,11,1)),
+#        dict(criterion = ['gini', 'entropy'], 
+#             n_estimators = [5, 8, 10, 12, 25],
+#             #min_samples_leaf = range(1,11,1),
+#             min_samples_split = [2, 4, 10, 20]),
+#        dict(kernel = ['rbf', 'linear', 'poly', 'sigmoid'],
+#             C = np.logspace(-2, 10, 4), 
+#             gamma = np.logspace(-9, 3, 4))
+#        ]    
+#    
+#    
+#for i, classifier in enumerate(classifiers):
+#    print 'Step 2: ', i, names[i]
+#    
+#    # Min Max Scaler except for decision tree and random forest
+#    if (i==0) | (i==1) | (i==4):
+#        Scaler = MinMaxScaler()
+#        features_train = Scaler.fit_transform(features_train)
+#        features_test = Scaler.transform(features_test)
+#    
+#    
+#    sss = StratifiedShuffleSplit(n_splits=30, test_size=0.2, random_state=random_state)
+#    clf = GridSearchCV(classifier, parameters[i], cv=sss, scoring='f1')
+#    
+#    clf.fit(features_train, labels_train)
+#    
+#    print "Best score: ", clf.best_score_
+#    
+#    clf = clf.best_estimator_
+#    
+#    print clf
+#    
+#    pred = clf.predict(features_test)
+#        
+#    print "Precision: ", precision_score(labels_test, pred)
+#    print "Recall:    ", recall_score(labels_test, pred)
+#    print "F1:        ", f1_score(labels_test, pred)
+#
+#    precision.append(precision_score(labels_test, pred))
+#    recall.append(recall_score(labels_test, pred))
+#    f1.append(f1_score(labels_test, pred))
+#    
+#    classifier_opt.append(clf)
+#    
+#   
+#    print 'done...'
+#    
+#print '-------------------------------------------------------------------------------'    
+#
+##%%
+#
+#test_classifier(classifier_opt[2], my_dataset, features_list)
     
-parameters = [
-        dict(),
-        dict(n_neighbors= range(1,20,1),
-             weights=['uniform', 'distance']),
-        dict(criterion = ['gini', 'entropy'], 
-             min_samples_split = [2, 4, 10, 20],
-             min_samples_leaf = range(1,11,1)),
-        dict(criterion = ['gini', 'entropy'], 
-             n_estimators = [5, 8, 10, 12, 25],
-             #min_samples_leaf = range(1,11,1),
-             min_samples_split = [2, 4, 10, 20]),
-        dict(C = [1, 5, 10, 100], 
-             gamma = [1, 10, 100, 1000])
-        ]    
+#%% Step 3
+
+print "Step 3: Decision Tree Optimization"
+
+precision = []
+recall = []
+f1 = []
+
+kValue = range(3,18,1)
+
+for k in kValue:
+
+    classifier = DecisionTreeClassifier(random_state=random_state)
+    
+    print "Number of features: ", k
+    select = SelectKBest(k=k)
     
     
-for i, classifier in enumerate(classifiers):
-    print 'Step 2: ', i, names[i]
     
-    # Min Max Scaler except for decision tree and random forest
-    if (i==0) | (i==1) | (i==4):
-        features_train = MinMaxScaler().fit_transform(features_train)
-        features_test = MinMaxScaler().fit_transform(features_test)
+    features_train_reduced = select.fit_transform(features_train, labels_train)
+    features_test_reduced = select.transform(features_test)
     
+    parameters = dict(criterion = ['gini', 'entropy'], 
+                 min_samples_split = range(10, 30, 1),
+                 min_samples_leaf = range(1,11,1))
     
-    sss = StratifiedShuffleSplit(n_splits=30, test_size=0.2, random_state=random_state)
-    clf = GridSearchCV(classifier, parameters[i], cv=sss, scoring='f1')
+    #combined_features = FeatureUnion([('pca', PCA()), ('select', SelectKBest())])
     
-    clf.fit(features_train, labels_train)
+    #estim = [('features', combined_features), ('CLF', classifier)]
     
+    #pipe = Pipeline(estim) 
+        
+    #sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
+    sss = StratifiedShuffleSplit(n_splits=30, test_size=.2, random_state=random_state)
+        
+    clf = GridSearchCV(classifier, parameters, scoring='f1', cv=sss)
+        
+    clf.fit(features_train_reduced, labels_train)
+        
     clf = clf.best_estimator_
     
-    print clf
-    
-    pred = clf.predict(features_test)
-        
+    pred = clf.predict(features_test_reduced)
+            
     print "Precision: ", precision_score(labels_test, pred)
     print "Recall:    ", recall_score(labels_test, pred)
     print "F1:        ", f1_score(labels_test, pred)
-
+    
     precision.append(precision_score(labels_test, pred))
     recall.append(recall_score(labels_test, pred))
     f1.append(f1_score(labels_test, pred))
     
-    classifier_opt.append(clf)
-    
-   
-    print 'done...'
-    
-print '-------------------------------------------------------------------------------'    
-
-#%%
-
-    
-#%% Step 3
-
-print "Step 4: Decision Tree Optimization"
-
-
-
-classifier = DecisionTreeClassifier()
-
-parameters = dict(CLF__criterion = ['gini', 'entropy'], 
-             CLF__min_samples_split = [2, 4, 10, 20], 
-             CLF__min_samples_leaf = range(1,11,1),
-             features__pca__n_components=range(1, len(features_list)-1),
-             features__select__k=range(1,8))
-
-combined_features = FeatureUnion([('pca', PCA()), ('select', SelectKBest())])
-
-estim = [('features', combined_features), ('CLF', classifier)]
-
-pipe = Pipeline(estim) 
-    
-#sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
-sss = StratifiedShuffleSplit(n_splits=30, test_size=.2, random_state=random_state)
-    
-clf = GridSearchCV(pipe, parameters, scoring='f1', cv=sss)
-    
-clf.fit(features_train, labels_train)
-    
-clf = clf.best_estimator_
-
-pred = clf.predict(features_test)
-        
-print "Precision: ", precision_score(labels_test, pred)
-print "Recall:    ", recall_score(labels_test, pred)
-print "F1:        ", f1_score(labels_test, pred)
+    test_classifier(clf, my_dataset, features_list)
     
 #%%
-
+plt.figure(figsize=(10,5))
+plt.plot(kValue,precision)
+plt.plot(kValue,recall)
+plt.plot(kValue,f1)
+plt.legend(['Precision', 'Recall', 'F1'])
+plt.xlabel('Number of features')
 
 dump_classifier_and_data(clf, my_dataset, features_list)
 
