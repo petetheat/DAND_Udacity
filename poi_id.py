@@ -50,10 +50,16 @@ df = pd.DataFrame(data, columns=features_list)
 #sns.plt.show()
 
 
-#sns.plt.figure(2, figsize=(10,5))
-#for fe in features_list:
-#    sns.boxplot(df[fe])
-#    sns.plt.show()
+sns.plt.figure(2, figsize=(10,5))
+for fe in features_list:
+    
+    iZero = df[fe] == 0
+    print "NaNs: ", float(sum(iZero))/float(len(iZero)) * 100, '%'
+    
+    
+                         
+    sns.boxplot(df[fe])
+    sns.plt.show()
 
 
 # Output outliers
@@ -75,6 +81,7 @@ df = pd.DataFrame(data, columns=features_list)
 data_dict.pop('TOTAL', 0)
 data_dict.pop('BHATNAGAR SANJAY', 0)
 data_dict.pop('BELFER ROBERT', 0)
+data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
 
 
 #%% Remove total_payments and total_stock_value from featureList
@@ -97,7 +104,7 @@ labels, features = targetFeatureSplit(data)
 random_state = 42
 
 features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=random_state)
+    train_test_split(features, labels, test_size=0.2, random_state=random_state)
 
 #%% Classifier Comparison: Step1: Classifiers with default parameters
 
@@ -136,6 +143,8 @@ for i, clf in enumerate(classifiers):
     f1.append(f1_score(labels_test, pred))
    
     print 'done...'
+
+test_classifier(classifiers[2], my_dataset, features_list)
     
 print '-------------------------------------------------------------------------------'    
 
@@ -202,10 +211,44 @@ print '-------------------------------------------------------------------------
 ##%%
 #
 #test_classifier(classifier_opt[2], my_dataset, features_list)
-    
-#%% Step 3
 
-print "Step 3: Decision Tree Optimization"
+#%% Step 3a
+
+print "Step 3a: Decision Tree Optimization"
+
+
+classifier = DecisionTreeClassifier(random_state=random_state)
+
+parameters = dict(criterion = ['gini', 'entropy'],
+             max_features = range(1,18,1),
+             min_samples_split = range(10, 30, 1),
+             min_samples_leaf = range(1,11,1))
+
+   
+#sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
+sss = StratifiedShuffleSplit(n_splits=30, test_size=.2, random_state=random_state)
+    
+clf = GridSearchCV(classifier, parameters, scoring='f1', cv=sss)
+    
+clf.fit(features_train, labels_train)
+    
+clf = clf.best_estimator_
+
+pred = clf.predict(features_test)
+        
+print "Precision: ", precision_score(labels_test, pred)
+print "Recall:    ", recall_score(labels_test, pred)
+print "F1:        ", f1_score(labels_test, pred)
+
+precision.append(precision_score(labels_test, pred))
+recall.append(recall_score(labels_test, pred))
+f1.append(f1_score(labels_test, pred))
+
+test_classifier(clf, my_dataset, features_list)
+ 
+#%% Step 3b
+
+print "Step 3b: Decision Tree Optimization"
 
 precision = []
 recall = []
@@ -225,7 +268,8 @@ for k in kValue:
     features_train_reduced = select.fit_transform(features_train, labels_train)
     features_test_reduced = select.transform(features_test)
     
-    parameters = dict(criterion = ['gini', 'entropy'], 
+    parameters = dict(criterion = ['gini', 'entropy'],
+                 max_features = range(1,k,1),
                  min_samples_split = range(10, 30, 1),
                  min_samples_leaf = range(1,11,1))
     
