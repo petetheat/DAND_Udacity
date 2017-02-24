@@ -234,19 +234,23 @@ classifier = DecisionTreeClassifier(random_state=random_state)
 
 parameters = dict(criterion = ['gini', 'entropy'],
              max_features = range(1,len(features_list),1),
-             max_depth = range(5, 30, 1),
-             #min_samples_split = range(10, 30, 1),
-             #min_samples_leaf = range(1,11,1),
-             class_weight = [None, 'balanced'])
+             max_depth = range(1, 5, 1),
+             min_samples_split = range(2, 6, 1),
+             min_samples_leaf = range(1,8,1),
+             max_leaf_nodes = [None, 7, 8, 9, 10],
+             splitter = ['best', 'random'],
+             class_weight = [None, 'balanced'],
+             presort = [False, True])
 
    
 #sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
-sss = StratifiedShuffleSplit(n_splits=30, test_size=.2, random_state=random_state)
+sss = StratifiedShuffleSplit(n_splits=60, test_size=.2, random_state=random_state)
     
 clf = GridSearchCV(classifier, parameters, scoring='f1', cv=sss)
     
 clf.fit(features_train, labels_train)
-    
+
+print "Best score: ", clf.best_score_    
 clf = clf.best_estimator_
 
 pred = clf.predict(features_test)

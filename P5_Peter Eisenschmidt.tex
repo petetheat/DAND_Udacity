@@ -1,0 +1,131 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{scrextend}
+\usepackage{blindtext}
+\addtokomafont{labelinglabel}{\sffamily}
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Project P5: Identify Fraud from Enron Email}
+\author{Peter Eisenschmidt}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Data Understanding and Exploration}
+
+Your text goes here.
+
+\subsection{Outlier Removal}
+
+The first step is to detect any outliers and to see if they need to be removed from the dataset. The TOTAL entry is removed, as it details the sum over all persons included in the dataset.  Furthermore, the entry THE TRAVEL AGENCY IN THE PARK is removed, as this is not a person but a corporation. \medskip
+
+In order to detect further entries that need to be excluded, boxplots are created for all the features, as this allows detecting outliers visually.\medskip
+
+Three parameters show outliers that require further investigation:
+
+%{\fontfamily{ppl}\selectfont this is a test} und weiter
+
+\begin{labeling}{restricted\_stock\_deferred}
+\item [loan\_advances] Only few data points are available for this parameter. One extreme point (81,525,000) sticks out. As this data point belongs to Ken Lay, it should be considered as valid.
+\item [restricted\_stock\_deferred] Only few data points available, most of them negative. The positive value requires further checking. 
+\item [restricted\_stock] One negative value whereas the remaining data points are positive.
+\end{labeling}
+
+The parameters total\_payments and total\_stockvalue are the sum of all payments (salary, bonus, etc) and stock values (exercised stock option, restricted stock option, and restricted stock option deferred) respectively. So, either all other values are excluded and only the sums are included or vice versa.
+
+\subsection{First Feature Selection}
+Lastly, it can be seen that a lot of parameters contain zeros (i.e. NaNs in the original dictionary). As this may influence the performance of the algorithm, all features which contain more than 75\% of zeros are removed.\medskip
+
+The retained parameters are:
+
+{\fontfamily{pcr}\selectfont['poi', 'salary', 'deferral\_payments', 'bonus', 'deferred\_income', 'expenses', 'exercised\_stock\_options', 'other', 'long\_term\_incentive', 'restricted\_stock', 'to\_messages', 'from\_poi\_to\_this\_person', 'from\_messages', 'from\_this\_person\_to\_poi', 'shared\_receipt\_with\_poi']}
+
+\section{Algorithm Selection and Tuning}
+
+\subsection{Assessment of Several Algorithms}
+As a first step, 5 algorithms are selected and run with their default parameters:
+\begin{enumerate}
+\item Gaussian Naives Bayes
+\item K Nearest Neighbors
+\item Decision Tree Classifier
+\item Random Forest Classifier
+\item Support Vector Classifier
+\end{enumerate}
+
+The dataset is split into a training and a test dataset using {\fontfamily{pcr}\selectfont train\_test\_split}; the size of the test set is .2.\medskip
+
+The results on the selected test set are:
+
+The results evaluated with tester.py are:
+
+One important thing to note is that when the algorithms are trained with their default parameters, the scoring parameter that is used to obtain the best fit is accuracy. However, in this case, accuracy is not the best metric to assess classifier performance, as there are only limited numbers of POIs in the dataset. Therefore, if all POIs were incorrectly classified as Non-POIs, the accuracy would still be XX.
+
+\subsection{First Tuning all Algorithms}
+As the performance was generally not good for the selected five algorithms, the next step is to use {\fontfamily{pcr}\selectfont GridSearchCV} to make a first tuning of the algorithms. Furthermore, MinMax scaling is applied to all algorithms except the Decision Tree and the Random Forest.\medskip
+
+This shows the importance of parameter tuning. In the previous step, the entire training data is used and the classifier is fit to that. However, the performance on the test set was bad in most cases. This is most likely due to over-fitting, which then means that it does not generalize well to the new data. Parameter tuning allows controlling over-fitting so that performance improves for the new, unknown test data. \medskip
+
+Furthermore, it shows that scaling is important for classifiers such as Support Vector Machines, as it maximizes the Euclidean distance between two clusters.
+
+\subsection{Algorithm Selection}
+Finally, for the final algorithm the decision tree is selected. The next step is to further tune this algorithm using {\fontfamily{pcr}\selectfont GridSearchCV}
+
+\section{Feature Selection}
+
+\section{Final Validation}
+
+\end{document}
