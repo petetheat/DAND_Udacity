@@ -30,7 +30,6 @@ from sklearn.feature_selection import SelectKBest, f_classif, chi2
 #%% F E A T U R E     S E L E C T I O N
 
 features_list = ['poi','salary', 'deferral_payments', 'total_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi'] 
-#features_list = ['poi', 'total_payments', 'total_stock_value'] 
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -39,15 +38,6 @@ with open("final_project_dataset.pkl", "r") as data_file:
 
 data = featureFormat(data_dict, features_list, sort_keys = True)
 df = pd.DataFrame(data, columns=features_list)
-
-### Create scatter matrix to first check for outliers    
-#sns.plt.figure(1, figsize=(10,10))
-
-#g=sns.PairGrid(df,hue="poi")
-#g.map_lower(plt.scatter)
-#g.map_diag(plt.hist)
-#g.map_upper(sns.boxplot)
-#sns.plt.show()
 
 feature_retained = []
 
@@ -68,19 +58,19 @@ for fe in features_list:
 
 
 # Output outliers
-#for i in data_dict:
-#    if data_dict[i]['loan_advances'] == df.loan_advances.max():
-#        print i, ': ', data_dict[i]['loan_advances'], data_dict[i]['poi']
+for i in data_dict:
+    if data_dict[i]['loan_advances'] == df.loan_advances.max():
+        print i, ': ', data_dict[i]['loan_advances'], data_dict[i]['poi']
 
-#for i in data_dict:
-#    if data_dict[i]['restricted_stock_deferred' ] == df.restricted_stock_deferred.max():
-#        print i, ': ', data_dict[i]['restricted_stock_deferred'], data_dict[i]['poi']
-#        print data_dict[i]
+for i in data_dict:
+    if data_dict[i]['restricted_stock_deferred' ] == df.restricted_stock_deferred.max():
+        print i, ': ', data_dict[i]['restricted_stock_deferred'], data_dict[i]['poi']
+        print data_dict[i]
         
-#for i in data_dict:
-#    if data_dict[i]['restricted_stock' ] == df.restricted_stock.min():
-#        print i, ': ', data_dict[i]['restricted_stock'], data_dict[i]['poi']
-#        print data_dict[i]        
+for i in data_dict:
+    if data_dict[i]['restricted_stock' ] == df.restricted_stock.min():
+        print i, ': ', data_dict[i]['restricted_stock'], data_dict[i]['poi']
+        print data_dict[i]        
 
 # Remove outliers    
 data_dict.pop('TOTAL', 0)
@@ -93,8 +83,25 @@ for i, fe in enumerate(feature_retained):
     if (fe == 'total_payments') | (fe == 'total_stock_value'):
         feature_retained.pop(i)
 
-#%% Remove total_payments and total_stock_value from featureList
-#features_list = ['poi','salary', 'deferral_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi'] 
+#%% Create new features
+
+for i in data_dict:
+    
+    if (data_dict[i]['from_this_person_to_poi'] != 'NaN') | (data_dict[i]['from_messages'] != 'NaN'):    
+        data_dict[i]['frac_from_poi'] = float(data_dict[i]['from_this_person_to_poi']) / float(data_dict[i]['from_messages'])
+    else:
+        data_dict[i]['frac_from_poi'] = 'NaN'
+        
+    if (data_dict[i]['from_poi_to_this_person'] != 'NaN') | (data_dict[i]['to_messages'] != 'NaN'):    
+        data_dict[i]['frac_to_poi'] = float(data_dict[i]['from_poi_to_this_person']) / float(data_dict[i]['to_messages'])
+    else:
+        data_dict[i]['frac_to_poi'] = 'NaN'
+
+#%%
+feature_retained.append('frac_from_poi')
+feature_retained.append('frac_to_poi')
+
+
 features_list = feature_retained
 
 
@@ -152,10 +159,11 @@ for i, clf in enumerate(classifiers):
     precision.append(precision_score(labels_test, pred))
     recall.append(recall_score(labels_test, pred))
     f1.append(f1_score(labels_test, pred))
-   
+    
     print 'done...'
 
-test_classifier(classifiers[2], my_dataset, features_list)
+for clf in classifiers:
+    test_classifier(clf, my_dataset, features_list)
     
 print '-------------------------------------------------------------------------------'    
 
@@ -216,14 +224,15 @@ for i, classifier in enumerate(classifiers):
     
     classifier_opt.append(clf)
     
-   
     print 'done...'
+    print " "
+
+for clf in classifier_opt:
+    test_classifier(clf, my_dataset, features_list)
     
 print '-------------------------------------------------------------------------------'    
 
-#%%
 
-test_classifier(classifier_opt[2], my_dataset, features_list)
 
 #%% Step 3a
 
@@ -235,11 +244,11 @@ classifier = DecisionTreeClassifier(random_state=random_state)
 parameters = dict(criterion = ['gini', 'entropy'],
              max_features = range(1,len(features_list),1),
              max_depth = range(1, 5, 1),
-             min_samples_split = range(2, 6, 1),
-             min_samples_leaf = range(1,8,1),
-             max_leaf_nodes = [None, 7, 8, 9, 10],
-             splitter = ['best', 'random'],
-             class_weight = [None, 'balanced'],
+             min_samples_split = [2,3, 4],#range(2, 6, 1),
+             min_samples_leaf = [2, 3, 4, 5],#range(1,8,1),
+             max_leaf_nodes = [10, 11],
+             splitter = ['random'], #['best', 'random'],
+             class_weight = ['balanced'],#[None, 'balanced'],
              presort = [False, True])
 
    
@@ -264,6 +273,10 @@ recall.append(recall_score(labels_test, pred))
 f1.append(f1_score(labels_test, pred))
 
 test_classifier(clf, my_dataset, features_list)
+
+print "Feature Importance: "
+for i, j in enumerate(clf.feature_importances_):
+    print("%(fe)25s : %(nu)5.5f" % {'fe': features_list[i+1], 'nu': j})#, j
  
 #%% Step 3b
 
