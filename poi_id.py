@@ -49,12 +49,17 @@ df = pd.DataFrame(data, columns=features_list)
 #g.map_upper(sns.boxplot)
 #sns.plt.show()
 
+feature_retained = []
 
 sns.plt.figure(2, figsize=(10,5))
 for fe in features_list:
     
     iZero = df[fe] == 0
-    print "NaNs: ", float(sum(iZero))/float(len(iZero)) * 100, '%'
+    percentageZero = float(sum(iZero))/float(len(iZero)) * 100          
+    print "NaNs: ", percentageZero, '%'
+    
+    if (percentageZero <= 75) | (fe=='poi'):
+        feature_retained.append(fe)
     
     
                          
@@ -83,9 +88,15 @@ data_dict.pop('BHATNAGAR SANJAY', 0)
 data_dict.pop('BELFER ROBERT', 0)
 data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
 
+# Remove total_payments and total_stock_value from list
+for i, fe in enumerate(feature_retained):
+    if (fe == 'total_payments') | (fe == 'total_stock_value'):
+        feature_retained.pop(i)
 
 #%% Remove total_payments and total_stock_value from featureList
-features_list = ['poi','salary', 'deferral_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi'] 
+#features_list = ['poi','salary', 'deferral_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi'] 
+features_list = feature_retained
+
 
 data = featureFormat(data_dict, features_list, sort_keys = True)    
 
@@ -151,66 +162,68 @@ print '-------------------------------------------------------------------------
 
 #%% Step 2: 
 
-#classifier_opt = []    
-#    
-#parameters = [
-#        dict(),
-#        dict(n_neighbors= range(1,20,1),
-#             weights=['uniform', 'distance']),
-#        dict(criterion = ['gini', 'entropy'], 
-#             min_samples_split = range(10, 30, 1),
-#             min_samples_leaf = range(1,11,1)),
-#        dict(criterion = ['gini', 'entropy'], 
-#             n_estimators = [5, 8, 10, 12, 25],
-#             #min_samples_leaf = range(1,11,1),
-#             min_samples_split = [2, 4, 10, 20]),
-#        dict(kernel = ['rbf', 'linear', 'poly', 'sigmoid'],
-#             C = np.logspace(-2, 10, 4), 
-#             gamma = np.logspace(-9, 3, 4))
-#        ]    
-#    
-#    
-#for i, classifier in enumerate(classifiers):
-#    print 'Step 2: ', i, names[i]
-#    
-#    # Min Max Scaler except for decision tree and random forest
-#    if (i==0) | (i==1) | (i==4):
-#        Scaler = MinMaxScaler()
-#        features_train = Scaler.fit_transform(features_train)
-#        features_test = Scaler.transform(features_test)
-#    
-#    
-#    sss = StratifiedShuffleSplit(n_splits=30, test_size=0.2, random_state=random_state)
-#    clf = GridSearchCV(classifier, parameters[i], cv=sss, scoring='f1')
-#    
-#    clf.fit(features_train, labels_train)
-#    
-#    print "Best score: ", clf.best_score_
-#    
-#    clf = clf.best_estimator_
-#    
-#    print clf
-#    
-#    pred = clf.predict(features_test)
-#        
-#    print "Precision: ", precision_score(labels_test, pred)
-#    print "Recall:    ", recall_score(labels_test, pred)
-#    print "F1:        ", f1_score(labels_test, pred)
-#
-#    precision.append(precision_score(labels_test, pred))
-#    recall.append(recall_score(labels_test, pred))
-#    f1.append(f1_score(labels_test, pred))
-#    
-#    classifier_opt.append(clf)
-#    
-#   
-#    print 'done...'
-#    
-#print '-------------------------------------------------------------------------------'    
-#
-##%%
-#
-#test_classifier(classifier_opt[2], my_dataset, features_list)
+classifier_opt = []    
+    
+parameters = [
+        dict(),
+        dict(n_neighbors= range(1,20,1),
+             weights=['uniform', 'distance']),
+        dict(criterion = ['gini', 'entropy'], 
+             min_samples_split = range(10, 30, 1),
+             min_samples_leaf = range(1,11,1)),
+        dict(criterion = ['gini', 'entropy'], 
+             n_estimators = [5, 8, 10, 12, 25],
+             #min_samples_leaf = range(1,11,1),
+             min_samples_split = [2, 4, 10, 20]),
+        dict(kernel = ['rbf', 'linear', 'poly', 'sigmoid'],
+             #C = np.logspace(-2, 10, 4), 
+             #gamma = np.logspace(-9, 3, 4)
+             C = [1, 10, 100],
+             gamma = [1, 10, 1000])
+        ]    
+    
+    
+for i, classifier in enumerate(classifiers):
+    print 'Step 2: ', i, names[i]
+    
+    # Min Max Scaler except for decision tree and random forest
+    if (i==0) | (i==1) | (i==4):
+        Scaler = MinMaxScaler()
+        features_train = Scaler.fit_transform(features_train)
+        features_test = Scaler.transform(features_test)
+    
+    
+    sss = StratifiedShuffleSplit(n_splits=30, test_size=0.2, random_state=random_state)
+    clf = GridSearchCV(classifier, parameters[i], cv=sss, scoring='f1')
+    
+    clf.fit(features_train, labels_train)
+    
+    print "Best score: ", clf.best_score_
+    
+    clf = clf.best_estimator_
+    
+    print clf
+    
+    pred = clf.predict(features_test)
+        
+    print "Precision: ", precision_score(labels_test, pred)
+    print "Recall:    ", recall_score(labels_test, pred)
+    print "F1:        ", f1_score(labels_test, pred)
+
+    precision.append(precision_score(labels_test, pred))
+    recall.append(recall_score(labels_test, pred))
+    f1.append(f1_score(labels_test, pred))
+    
+    classifier_opt.append(clf)
+    
+   
+    print 'done...'
+    
+print '-------------------------------------------------------------------------------'    
+
+#%%
+
+test_classifier(classifier_opt[2], my_dataset, features_list)
 
 #%% Step 3a
 
@@ -220,9 +233,11 @@ print "Step 3a: Decision Tree Optimization"
 classifier = DecisionTreeClassifier(random_state=random_state)
 
 parameters = dict(criterion = ['gini', 'entropy'],
-             max_features = range(1,18,1),
-             min_samples_split = range(10, 30, 1),
-             min_samples_leaf = range(1,11,1))
+             max_features = range(1,len(features_list),1),
+             max_depth = range(5, 30, 1),
+             #min_samples_split = range(10, 30, 1),
+             #min_samples_leaf = range(1,11,1),
+             class_weight = [None, 'balanced'])
 
    
 #sss = StratifiedShuffleSplit(n_splits=100, test_size=.3, random_state=random_state)
