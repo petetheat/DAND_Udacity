@@ -68,18 +68,19 @@
 \begin{document}
 \maketitle
 
+\section{Introduction}
+
+The goal of this project is to identify potential persons of interest (POI) based on their financial and email data. Machine learning is used here as this allows building a model which determines whether or not a person is a POI based on numerous input features. The clear advantage of machine learning here is that multiple features can be combined whereas this would not be possible in a classical approach.\medskip
+
+The problem here in this project is a supervised classification problem: supervised because in the available Enron dataset we know who is a POI and who is not and classification because the output is not continuous (either POI=1 or not POI=0, but no intermediate values).
+
 \section{Data Understanding and Exploration}
 
 \subsection{Dataset Description}
 
-total number of data points
+The Enron data set contains total number of 146 data points. From these 146 entries, 18 are labelled as POI. 21 different features (financial and email) are included in the data set. However, not all features are available for all persons, so a few features have missing values.\medskip
 
-allocation across classes (POI/non-POI)
-
-number of features used
-
-are there features with many missing values? etc.
-
+The next step is to check if all 146 entries are valid entries and if all features can be used for this project.
 
 \subsection{Outlier Removal}
 
@@ -96,6 +97,12 @@ Three parameters show outliers that require further investigation:
 \item [restricted\_stock\_deferred] Only few data points available, most of them negative. The positive value requires further checking. 
 \item [restricted\_stock] One negative value whereas the remaining data points are positive.
 \end{labeling}
+
+\includegraphics[width=\textwidth]{loan_advances}
+
+\includegraphics[width=\textwidth]{restricted_stock}
+
+\includegraphics[width=\textwidth]{restricted_stock_deferred}
 
 The entries where restricted\_stock\_deferred restricted\_stock show outliers belong to BHATNAGAR SANJAY and BELFER ROBERT. These entries are then removed from the dataset.\medskip
 
@@ -200,7 +207,7 @@ Precision or recall may be undefined due to a lack of true positive predicitons.
 
 It can be seen that most classifiers do not perform well on the test set; only the Gaussian Naives Bayes and the Decision Tree yield results. Whereas on the test set the GaussianNB has precision and recall greater than .3 (required value), using tester.py the performance is not as good, albeit close. The Decision Tree is already close using tester.py but has only a recall of .2 on the test set. Interestingly, the K Nearest Neighbor algorithm has values of 0 for recall and precision on the test set, but achieves significantly better results with tester.py.\medskip
 
-One important thing to note is that when the algorithms are trained with their default parameters, the scoring parameter that is used to obtain the best fit is accuracy. However, in this case, accuracy is not the best metric to assess classifier performance, as there are only limited numbers of POIs in the dataset. Therefore, if all POIs were incorrectly classified as Non-POIs, the accuracy would still be XX. This will be addressed in the next step.
+One important thing to note is that when the algorithms are trained with their default parameters, the scoring parameter that is used to obtain the best fit is accuracy. However, in this case, accuracy is not the best metric to assess classifier performance, as there are only limited numbers of POIs in the dataset. Therefore, if all 18 POIs were incorrectly classified as Non-POIs, the accuracy would still be 0.8732 (based on 142 entries in the dataset, as 4 were removed initially). This will be addressed in the next step.
 
 \subsection{First Tuning of All Algorithms}
 As the performance was generally not good for the selected five algorithms, the next step is to use {\fontfamily{pcr}\selectfont GridSearchCV} to make a first tuning of the algorithms. Furthermore, MinMax scaling is applied to all algorithms except the Decision Tree and the Random Forest.\medskip
@@ -316,9 +323,9 @@ Precision or recall may be undefined due to a lack of true positive predicitons.
 
 This shows the importance of parameter tuning. In the previous step, the entire training data is used and the classifier is fit to that. However, the performance on the test set was bad in most cases. This is most likely due to over-fitting, which then means that it does not generalize well to the new data. Parameter tuning allows controlling over-fitting so that performance improves for the new, unknown test data. \medskip
 
-Here, with only a few parameters that are tuned, it can be seen that, especially for the Decision Tree and Random Forest, the performance with tester.py increased.
+Here, with only a few parameters that are tuned, it can be seen that, especially for the Decision Tree and Random Forest, the performance with tester.py increased.\medskip
 
-Furthermore, it shows that scaling is important for classifiers such as Support Vector Machines, as it maximizes the Euclidean distance between two clusters. Previously, there were no results on the test set but now it achieves a precision and recall of .667 and .4 respectively. The fact that it fails with tester.py shows that more tuning is necessary though.
+Furthermore, it shows that scaling is important for classifiers such as Support Vector Machines, as it maximizes the Euclidean distance between two clusters. Previously, there were no results on the test set but now it achieves a precision and recall of .667 and .4 respectively. The fact that it fails with tester.py shows that more tuning is necessary though.\medskip
 
 \subsection{Algorithm Selection}
 For the final algorithm the decision tree is selected, as this algoritm gives the best results with tester.py. The next step is to further tune this algorithm using {\fontfamily{pcr}\selectfont GridSearchCV}; the parameters that are tuned are:
@@ -336,22 +343,123 @@ For the final algorithm the decision tree is selected, as this algoritm gives th
 The number of splits of {\fontfamily{pcr}\selectfont StratifiedShuffleSplit} is changed to 60 (in the previous section it was 30).\medskip
 
 The results on the selected test set are:
+\begin{verbatim}
+Step 3a: Decision Tree Optimization
+Best score:  0.465944148444
+Precision:  0.5
+Recall:     0.8
+F1:         0.615384615385
+\end{verbatim}
 
 The results evaluated with tester.py are:
+{\tiny
+\begin{verbatim}
+DecisionTreeClassifier(class_weight='balanced', criterion='entropy',
+            max_depth=1, max_features=15, max_leaf_nodes=10,
+            min_impurity_split=1e-07, min_samples_leaf=2,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            presort=False, random_state=42, splitter='random')
+        Accuracy: 0.79257       Precision: 0.37895      Recall: 0.70750 F1: 0.49355     F2: 0.60295
+        Total predictions: 14000        True positives: 1415    False positives: 2319   False negatives:  585   True negatives: 9681
+\end{verbatim}
+}
+
+It can be seen that now both the test set and tester.py yield results greater than the required values of .3.\medskip
 
 The importance of the features is checked with {\fontfamily{pcr}\selectfont feature\_importances\_} attribute of the decision tree:
 \begin{verbatim}
-test 
+Feature Importance: 
+                   salary : 0.00000
+        deferral_payments : 0.00000
+                    bonus : 0.00000
+          deferred_income : 0.00000
+                 expenses : 0.20266
+  exercised_stock_options : 0.09872
+                    other : 0.00000
+      long_term_incentive : 0.00000
+         restricted_stock : 0.00000
+              to_messages : 0.00000
+  from_poi_to_this_person : 0.00000
+            from_messages : 0.00000
+  from_this_person_to_poi : 0.00000
+  shared_receipt_with_poi : 0.00000
+            frac_from_poi : 0.69862
+              frac_to_poi : 0.00000
 \end{verbatim}
 
 \section{Feature Selection}
 
-\section{Final Validation}
+In the previous section it has been shown that 'expenses', 'exercised\_stock\_options', and the newly created feature 'frac\_from\_poi' have the highest importance in the decision tree. So, the decision tree is trained again with only these features. \medskip
 
-The previous section have highlighted the importance of validation. In this case, the available data was split into a training and a test set. In this case, the test set was determined by the random state set in {\fontfamily{pcr}\selectfont train\_test\_split} (here fixed to 42 in order to get reproducable results for this project). \medskip
+In the Grid Search, the parameter {\fontfamily{pcr}\selectfont max\_features} now needs to be adapted as the previous Grid Search returned a value of 15, which is greater than the number of features now.\medskip
 
-With this test set and the parameter tuning it was possible to achieve good results in terms of precision and recall; both were (for my test set) greater than the required values of .3 (see previous section). However, with the tester function, the results were not as good.\medskip
+The results on the selected test set are:
+\begin{verbatim}
+Step 3b: Decision Tree Optimization
+['poi', 'expenses', 'exercised_stock_options', 'frac_from_poi']
+Best score:  0.48737993488
+Precision:  0.25
+Recall:     0.333333333333
+F1:         0.285714285714
+\end{verbatim}
 
-This shows that it is very important 
+The results evaluated with tester.py are:
+{\tiny
+\begin{verbatim}
+DecisionTreeClassifier(class_weight='balanced', criterion='entropy',
+            max_depth=3, max_features=2, max_leaf_nodes=10,
+            min_impurity_split=1e-07, min_samples_leaf=3,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            presort=False, random_state=42, splitter='random')
+        Accuracy: 0.83929       Precision: 0.42656      Recall: 0.36300 F1: 0.39222     F2: 0.37415
+        Total predictions: 14000        True positives:  726    False positives:  976   False negatives: 1274   True negatives: 11024
+\end{verbatim}
+}
+
+The results are not as good as when using all features; however, the results with tester.py are greater than .3. So for the final validation, it has been decided to keep all initial features in order to obtain the best performance.
+
+
+\section{Final Algorithm and Validation}
+
+Before doing the final validation, a check is done without the two newly created features. The classifier is run with all features except the two new ones (and the ones with more than 75\% zeros). Please note that this requires adapting the parameter {\fontfamily{pcr}\selectfont max\_features} to 14.\medskip
+
+The results are the following with the test set:
+\begin{verbatim}
+Precision:  0.277777777778
+Recall:     1.0
+F1:         0.434782608696
+\end{verbatim}
+tester.py yields the following:
+{\tiny
+\begin{verbatim}
+DecisionTreeClassifier(class_weight='balanced', criterion='entropy',
+            max_depth=1, max_features=14, max_leaf_nodes=10,
+            min_impurity_split=1e-07, min_samples_leaf=2,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            presort=False, random_state=42, splitter='random')
+        Accuracy: 0.65886       Precision: 0.26346      Recall: 0.77300 F1: 0.39298     F2: 0.55740
+        Total predictions: 14000        True positives: 1546    False positives: 4322   False negatives:  454   True negatives: 7678
+\end{verbatim}
+}
+Both on the test set and tester.py the performance is worse; precision is below the required value of .3. This shows how important these new features are.\medskip
+
+The previous sections have highlighted the importance of validation. In this case, the available data was split into a training and a test set. The test set was determined by the random state set in {\fontfamily{pcr}\selectfont train\_test\_split} (here fixed to 42 in order to get reproducable results for this project). \medskip
+
+The algorithm was tuned on the training data; here, {\fontfamily{pcr}\selectfont GridSearchCV} applied cross-validation using {\fontfamily{pcr}\selectfont StratifiedShuffleSplit} in order to avoid over-fitting. \medskip
+
+Then, at each step, the classifier performance was evaluated with the previously unseen test set. It is important that the test data is not used for model training, as this could (and most likely will) result in over-fitting. The second validation step is done with tester.py, which simulates new, future data. Again, it is important that the data used for validation is not used in the training, in order to ensure that the classifier generalizes well to new data.\medskip
+
+So, the final algorithm has the following performance:
+{\tiny
+\begin{verbatim}
+DecisionTreeClassifier(class_weight='balanced', criterion='entropy',
+            max_depth=1, max_features=15, max_leaf_nodes=10,
+            min_impurity_split=1e-07, min_samples_leaf=2,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            presort=False, random_state=42, splitter='random')
+        Accuracy: 0.79257       Precision: 0.37895      Recall: 0.70750 F1: 0.49355     F2: 0.60295
+        Total predictions: 14000        True positives: 1415    False positives: 2319   False negatives:  585   True negatives: 9681
+\end{verbatim}
+}
 
 \end{document}
