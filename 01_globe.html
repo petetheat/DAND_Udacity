@@ -4,6 +4,16 @@
   <meta charset="utf-8">
   <script src="http://d3js.org/d3.v3.min.js"></script>
     <style>
+      circle {
+        fill: orange;
+        stroke: black;
+        stroke-width: 0.7;
+        opacity: 0.7;
+      }	
+	  h2 {
+	    text-align: center;
+		font: Arial;
+	  }
     </style>
     <script type="text/javascript">  
       function draw(geo_data) {
@@ -12,6 +22,10 @@
             width = 1400 - margin,
             height = 600 - margin;
 
+		d3.select('body')
+		  .append('h2')
+		  .text('World Cup ');
+			
         var svg = d3.select("body")
             .append("svg")
             .attr("width", width + margin)
@@ -30,7 +44,7 @@
 					 .enter()
 					 .append('path')
 					 .attr('d', path)
-					 .style('fill', 'rgb(9,157,217)')
+					 .style('fill', 'lightblue')
 					 .style('stroke', 'black')
 					 .style('stroke-width', 0.5);
 		
@@ -52,11 +66,19 @@
 				var center_y = d3.mean(coords, function(d) {
 					return d[1];
 				});
+				
+				var teams = d3.set()
+				
+				leaves.forEach(function(d) {
+					teams.add(d['team1']);
+					teams.add(d['team2']);
+				});
 								
 				return {
 					'attendance' : total,
 					'x' : center_x,
-					'y' : center_y
+					'y' : center_y,
+					'teams' : teams.values()
 				};
 			};
 		
@@ -73,31 +95,90 @@
 			
 			var radius = d3.scale.sqrt()
 						   .domain(attendance_extent)
-						   .range([0, 12]);
+						   .range([5, 20]);
 			
+			// Key function
+			function key_func(d) {
+				return d['key'];
+			};
+			
+			// Plot Circles
 			svg.append('g')
 				.attr('class', 'bubble')
 				.selectAll('circle')
 				.data(nested.sort(function(a,b) {
 					return b.values['attendance'] - a.values['attendance'];
-				}))
+				}), key_func)
 				.enter()
 				.append('circle')
-				.attr('cx', function(d) {
-					return d.values.x;
-				})
-				.attr('cy', function(d) {
-					return d.values.y;
-				})
-				.attr('r', function(d) {
-					return radius(d.values['attendance']);
-				})
-				.attr('fill', 'rgb(247, 148, 32)')
-				.attr('stroke', 'black')
-				.attr('stroke-width', .7)
-				.attr('opacity', .7);
+				.attr('cx', function(d) {return d.values.x;})
+				.attr('cy', function(d) {return d.values.y;})
+				.attr('r', function(d) {return radius(d.values['attendance']);})
+		
+			function update(year) {
+				var filtered = nested.filter(function(d) {
+					return new Date(d['key']).getUTCFullYear() === year;
+				});
+			
+				d3.select('h2')
+				  .text('World Cup ' + year);
+				  
+				  
+				var circles = svg.selectAll('circle')
+								.data(filtered, key_func);
 				
+				circles.exit().remove();
+				
+				circles.enter()
+					   .append('circle')
+					   .transition()
+					   .duration(500)
+					   .attr('cx', function(d) {return d.values.x;})
+					   .attr('cy', function(d) {return d.values.y;})
+					   .attr('r', function(d) {return radius(d.values['attendance']);})
+				
+				
+				var countries = filtered[0].values['teams']
+				
+				function update_countries(d) {
+					if(countries.indexOf(d.properties.name) !== -1) {
+						return 'lightBlue';
+					} else {
+						return 'white';
+					};
+				};
+				
+				svg.selectAll('path')
+				   .transition()
+				   .duration(500)
+				   .style('fill', update_countries);
+				   
+				//if (year == 1982) { debugger;};
+			};	
+			
+			var years = [];
+			
+			for (var i=1930; i< 2015; i+=4) {
+				if (i != 1942 && i != 1946) {
+					years.push(i);
+				};
+			};
+			
+			var year_idx = 0;
+			
+			var year_interval = setInterval(function() {
+				update(years[year_idx]);
+				year_idx++;
+				
+				//debugger;
+				
+				if (year_idx >= years.length) {
+					clearInterval(year_interval);
+				};
+			}, 1000);
 		};
+		
+		
 					 
 		var format = d3.time.format("%d-%m-%Y (%H:%M h)");	
 		d3.tsv("world_cup_geo.tsv", function(d) {
@@ -105,6 +186,7 @@
 			d['attendance'] = +d["attendance"];
 			return d;
 		}, plot_points);
+		
       };
       </script>
   </head>
