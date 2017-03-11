@@ -1,2 +1,10 @@
-# DAND_Udacity
-My repository for my Udacity data analysis nanodegree
+# P6: Data Visualization
+Peter Eisenschmidt
+
+## Summary
+
+## Design
+
+## Feedback
+
+## Resources
