@@ -7,6 +7,8 @@ The visualization depicts the final standings of the first division of the Germa
 
 ## Design
 
+[a relative link](first_sketch.pdf)
+
 ## Feedback
 
 ## Resources
