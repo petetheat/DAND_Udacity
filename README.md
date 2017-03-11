@@ -19,3 +19,10 @@ Finally, when hovering the mouse over a data entry the name of the team should b
 ## Resources
 
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
+
+The code for the table creation is inspired by this example:
+http://bl.ocks.org/LeeMendelowitz/11383724
+
+
+http://stackoverflow.com/questions/19757638/how-to-pivot-a-table-with-d3-js
+http://stackoverflow.com/questions/14567809/how-to-add-an-image-to-an-svg-container-using-d3-js
