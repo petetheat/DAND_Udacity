@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8">
   <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-  <script type="text/javascript" src="jquery.tipsy.js"></script>
-  <link href="tipsy.css" rel="stylesheet" type="text/css" />
     <style>
+	body { font: 12px Arial;
+	}
 	h2 {
 	    text-align: center;
-		font-family: Arial;
+		font-family: 14px Arial;
 	  }
 	th {
 		font-family: Helvetica;
@@ -35,17 +34,17 @@
     }
 
 	path { 
-    stroke: gray;
-    stroke-width: 2;
-    fill: none;
-}
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
-    stroke-width: 1;
-    shape-rendering: crispEdges;
-}  
+		stroke: gray;
+		stroke-width: 2;
+		fill: none;
+	}
+	.axis path,
+	.axis line {
+		fill: none;
+		stroke: black;
+		stroke-width: 1;
+		shape-rendering: crispEdges;
+	}  
 	  
 	</style>
     <script type="text/javascript"> 
@@ -120,6 +119,24 @@
 				return values
 			};
 			
+			function tableRowClicked(x) {
+				var SelectedRow = x.key;
+				d3.selectAll('.line')
+				  .style('stroke', 'gray')
+				  .style('stroke-width', 1);
+				d3.selectAll('circle')
+				  .style('fill', 'gray')  
+				  .attr("r", 3)
+				  
+				d3.selectAll('path#St' + x.key)
+				  .style('stroke', 'rgb(206, 4, 4)')
+				  .style('stroke-width', 2);
+				d3.selectAll('circle#St' + x.key)
+				  .style('fill', 'rgb(206, 4, 4)')  
+				  .attr("r", 5)
+			};
+
+			
 			
 			//////////////////////////////////////////////////
 			
@@ -182,6 +199,24 @@
               .attr("class", "y axis")
               .attr("transform", "translate(" + margin + ",0)")
               .call(point_axis);
+			  
+			// Axis labels
+
+			d3.select("svg")
+			  .append("text")      // text label for the x axis
+			  .attr("x", width/2)
+              .attr("y",  height + margin/2 )
+			  .style("text-anchor", "middle")
+			  .text("Year");
+			  
+			d3.select("svg")
+			  .append("text")
+			  .attr("transform", "rotate(-90)")
+			  .attr("y", margin/3)
+              .attr("x",0 - ((height+margin) / 2))
+			  .attr("dy", "1em")
+			  .style("text-anchor", "middle")
+			  .text("Points"); 
 
 			var line = d3.svg.line()
 						     .x(function(d) { 
@@ -200,6 +235,7 @@
 				 .text(function(d) {return d;});
 			
 			// Add data to the table body
+
 			var rows = table.append('tbody')
 							.selectAll('tr')
 							.data(nested).enter()
@@ -210,8 +246,25 @@
 							.data(extractRowData)
 							.enter()
 							.append('td')
-							.text(function(d) {return d;});
+							.text(function(d) {return d;})
+							.attr('class', 'myCells');
+				
+
 			
+			
+			
+	/*		var rows = table.append('tbody')
+							.selectAll('tr')
+							.data(nested).enter()
+							.append('tr')
+							.attr('class', 'standing_rows');
+							
+			var cells = rows.selectAll('td')
+							.data(extractRowData)
+							.enter()
+							.append('td')
+							.text(function(d) {return d;});
+	*/		
 			
 			// Plot graphs
 			
@@ -225,7 +278,7 @@
 				  .attr('d', line(d.values));
 			
 				d3.select('svg')
-				  .selectAll('circle')
+				  .selectAll('circle_' + i.toString())
 				  .data(d.values)
 				  .enter()
 				  .append('circle')
@@ -234,7 +287,8 @@
 				  .attr("cx", function (a) { 
 					var format = d3.time.format('%Y');
 					return time_scale(format.parse(a['year'])); })
-                  .attr("cy", function (a) { return point_scale(a['points']); }); 
+                  .attr("cy", function (a) { return point_scale(a['points']); })
+				  .attr('id', 'St'+ d.key); 
 			
 			});
 			
@@ -247,7 +301,9 @@
 						  .duration(250)
 						  .style("background", "white")
 						  .style("color", "black")
-			
+						
+						tableRowClicked(d);
+						
 						d3.select(this)
 						  .transition()
 						  .duration(250)
