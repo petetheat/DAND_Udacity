@@ -119,6 +119,7 @@
 				return values
 			};
 			
+			// Helper function to highlight lines that are selected in the table
 			function tableRowClicked(x) {
 				var SelectedRow = x.key;
 				d3.selectAll('.line')
@@ -217,6 +218,14 @@
 			  .attr("dy", "1em")
 			  .style("text-anchor", "middle")
 			  .text("Points"); 
+			
+			// Source text
+			d3.select("svg")
+			  .append("text")      
+			  .attr("x", 2*margin)
+			  .attr("y", height+2*margin - 60)
+			  .style("text-anchor", "middle")
+			  .text("Source: http://www.football-data.co.uk/");
 
 			var line = d3.svg.line()
 						     .x(function(d) { 
@@ -240,7 +249,10 @@
 							.selectAll('tr')
 							.data(nested).enter()
 							.append('tr')
-							.attr('class', 'standing_rows');
+							.attr('class', 'standing_rows')
+							.attr('id', function(d) {
+								return 'St'+ d.key;
+							});
 							
 			var cells = rows.selectAll('td')
 							.data(extractRowData)
@@ -249,22 +261,7 @@
 							.text(function(d) {return d;})
 							.attr('class', 'myCells');
 				
-
-			
-			
-			
-	/*		var rows = table.append('tbody')
-							.selectAll('tr')
-							.data(nested).enter()
-							.append('tr')
-							.attr('class', 'standing_rows');
-							
-			var cells = rows.selectAll('td')
-							.data(extractRowData)
-							.enter()
-							.append('td')
-							.text(function(d) {return d;});
-	*/		
+	
 			
 			// Plot graphs
 			
@@ -272,10 +269,38 @@
 				d3.select('svg')
 				  .append('path')
 				  .attr("class", "line")
-				  //.style('stroke', 'red')
 				  .style('stroke-width', 1)
 				  .attr('id', 'St'+ d.key)
-				  .attr('d', line(d.values));
+				  .attr('d', line(d.values))
+				  .on("mouseover", function(a) {
+				    d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				    
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3)
+				  
+					d3.selectAll('.standing_rows')
+					  //.transition()
+					  //.duration(250)
+					  .style("background", "white")
+					  .style("color", "black")
+
+					d3.select(this)
+					  .style('stroke', 'rgb(206, 4, 4)')
+					  .style('stroke-width', 2)
+															
+					var standing = this.id
+					
+					d3.selectAll('circle#' + standing)
+					  .style('fill', 'rgb(206, 4, 4)')  
+					  .attr("r", 5)
+					  
+					d3.select('tr#' + standing)
+					  .style("background", "steelBlue")
+					  .style("color", "white");
+				  });
 			
 				d3.select('svg')
 				  .selectAll('circle_' + i.toString())
@@ -291,39 +316,22 @@
 				  .attr('id', 'St'+ d.key); 
 			
 			});
-			
-			//debugger;
-			
+						
 			// Define mouse over and click functions to highlight rows and select plot data
 			rows.on("mouseover", function(d) {
 						d3.selectAll(".standing_rows")
-						  .transition()
-						  .duration(250)
 						  .style("background", "white")
 						  .style("color", "black")
 						
 						tableRowClicked(d);
 						
 						d3.select(this)
-						  .transition()
-						  .duration(250)
 						  .style("background", "steelBlue")
-						  .style("color", "white")
+						  .style("color", "white");
 			});
-			
-					
-			/*rows.on("mouseout", function(d) {
-						d3.select(this)
-						  .transition()
-						  .duration(250)
-						  .style("background", "white")
-						  .style("color", "black")
-			});*/
 			
 			rows.on("click", function(d) {
 						d3.select(this)
-						  .transition()
-						  .duration(250)
 						  .style("background", "red")
 						  .style("color", "white")
 			});
