@@ -16,6 +16,21 @@ Finally, when hovering the mouse over a data entry the name of the team should b
 
 ## Feedback
 
+### Feedback Number 1:
+
+* What do you notice in the visualization?
+	1.	I see the growing gap between the first ranked team to rest of the teams 
+	2.	Intense competition amongst teams in the middle of the table 
+* What questions do you have about the data?
+	1.	Would be interested to actually know the team?
+* What relationship do you notice?
+	1. I do not see a relationship per se. It’s not clear whether I need to draw any relationship from this chart. One thing I notice however though trends in points of lower ranked teams and higher ranked teams are sort of inversely proportional but top ranked team and the bottom ranked teams are not really correlated.
+* What do you think is the main takeaway from this visualization?
+	1. It looks like Bundesliga is dominated by one team lately not having a clear contender against the top ranked team.
+* Is there something you don’t understand in the graphic?
+	1. Not really. I would just add it is slightly bothersome with flashing screen when highlighting different row. 
+
+
 ## Resources
 
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
