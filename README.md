@@ -17,35 +17,44 @@ Finally, when hovering the mouse over a data entry the name of the team should b
 
 ### First Version
 
+### Final Version
+
+I noticed that it makes a huge difference if the person looking at the visualization is interested in soccer and follows the Bundesliga closely or if they
+are not at all interested in it. The first group of people having a certain background knowledge understands immediately what the numbers in the table mean. 
+The second group of people struggles at first as the table doesn't mean anything to them. This is why I added an explanatory sentence above the table.
+
+Secondly, people remarked that when hovering over the table rows quickly the transition effect (I set the transition to 250 ms) caused a lot of rows to turn black.
+Looking more closely into that I found out that this effect was worse when using Internet Explorer 11 (I use Chrome and did all my checks there obviously without
+checking the display on other browsers). As you don't know which browser your audience uses I decided to remove the transition effects completely.
+
 
 
 ## Feedback
 
 ### Feedback Number 1:
 
-* What do you notice in the visualization?
-	1.	I see the growing gap between the first ranked team to rest of the teams 
-	2.	Intense competition amongst teams in the middle of the table 
-* What questions do you have about the data?
-	1.	Would be interested to actually know the team?
-* What relationship do you notice?
-	1. I do not see a relationship per se. It’s not clear whether I need to draw any relationship from this chart. One thing I notice however though trends in points of lower ranked teams and higher ranked teams are sort of inversely proportional but top ranked team and the bottom ranked teams are not really correlated.
-* What do you think is the main takeaway from this visualization?
-	1. It looks like Bundesliga is dominated by one team lately not having a clear contender against the top ranked team.
-* Is there something you don’t understand in the graphic?
-	1. Not really. I would just add it is slightly bothersome with flashing screen when highlighting different row. 
+1. What do you notice in the visualization?
+> I see the growing gap between the first ranked team to rest of the teams and intense competition amongst teams in the middle of the table 
+2. What questions do you have about the data?
+> Would be interested to actually know the team?
+3. What relationship do you notice?
+> I do not see a relationship per se. It’s not clear whether I need to draw any relationship from this chart. One thing I notice however though trends in points of lower ranked teams and higher ranked teams are sort of inversely proportional but top ranked team and the bottom ranked teams are not really correlated.
+4. What do you think is the main takeaway from this visualization?
+> It looks like Bundesliga is dominated by one team lately not having a clear contender against the top ranked team.
+5. Is there something you don’t understand in the graphic?
+> Not really. I would just add it is slightly bothersome with flashing screen when highlighting different row. 
 
 ### Feedback Number 2:
-* What do you notice in the visualization?
-	1.	The deviation between the teams in the lower ranks is quite constant throughout the years. However, you can notice a growing gap between the first place and the remaining teams
-* What questions do you have about the data?
-	1.	None really, but it could be interesting to see the correlation to other data such as investments in players
-* What relationship do you notice?
-	1.  In some years you can notice that the points of the individual standings follow similar trends, as can be seen in 2002 or 2011
-* What do you think is the main takeaway from this visualization?
-	1. Maybe that the Bundesliga would be more interesting without Bayern Munich
-* Is there something you don’t understand in the graphic?
-	1. I think I understood everything
+1. What do you notice in the visualization?
+> The deviation between the teams in the lower ranks is quite constant throughout the years. However, you can notice a growing gap between the first place and the remaining teams
+2. What questions do you have about the data?
+> None really, but it could be interesting to see the correlation to other data such as investments in players
+3. What relationship do you notice?
+> In some years you can notice that the points of the individual standings follow similar trends, as can be seen in 2002 or 2011
+4. What do you think is the main takeaway from this visualization?
+> Maybe that the Bundesliga would be more interesting without Bayern Munich
+5. Is there something you don’t understand in the graphic?
+> I think I understood everything
 
 ### Feedback Number 3:
 
