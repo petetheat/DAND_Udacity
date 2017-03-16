@@ -23,11 +23,24 @@ I noticed that it makes a huge difference if the person looking at the visualiza
 are not at all interested in it. The first group of people having a certain background knowledge understands immediately what the numbers in the table mean. 
 The second group of people struggles at first as the table doesn't mean anything to them. This is why I added an explanatory sentence above the table.
 
+I added the source of the data at the bottom. That was not based on any of the remarks I got but I think it is important to be transparent about where the 
+data comes from.
+
 Secondly, people remarked that when hovering over the table rows quickly the transition effect (I set the transition to 250 ms) caused a lot of rows to turn black.
 Looking more closely into that I found out that this effect was worse when using Internet Explorer 11 (I use Chrome and did all my checks there obviously without
-checking the display on other browsers). As you don't know which browser your audience uses I decided to remove the transition effects completely.
+checking the display on other browsers). As you don't know which browser your audience uses I decided to remove the transition effects completely. Comparing the
+first and final version that even in Chrome it is more pleasing to the eye without the transition effects.
 
+Thirdly, people said that it was good to highlight the line when hovering over a row but that it would be good to have the same effect vice versa, i.e. 
+highlighting a row when hovering over a line. As all line are displayed at the same time you cannot see which position that line corresponds to. So, the 
+visualization now allows interactivity in both directions.
 
+Lastly, as people told me that they would like to know which teams are behind the numbers (to see for example which team has actually dominated the Bundesliga
+in recent years, as not everyone knows that) I added tooltips in both the table and the line chart that display the team name, the number of points, and
+also the goal difference as often this is needed as tie breaker.  
+
+This was something that I wanted to include from the beginning (see the first sketch) but at first it seemed too complicated in D3 so I left it out in the first
+version. After the feedback however I decided to put it in the final version despite the headache it caused to implement it.
 
 ## Feedback
 
