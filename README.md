@@ -7,15 +7,54 @@ The visualization depicts the final standings of the first division of the Germa
 
 ## Design
 
-### First Idea
-The following [pdf](first_sketch.pdf) shows a first sketch of how I want to visualize the data. The idea is to display the data in a table where each row is for the standing and each column for each year.
+### Data
 
-The table contains the number of points for each standing/year. When selecting a standing (e.g. 1 for the champion or 16 to 18 for the relegated teams), a line chart should display the points for that standing for all years. The aim is to show if there are trends over the years, for example 
-the number of points required to win the championship or avoid relegation to 2nd division.
+The data is obtained from [www.football-data.co.uk](http://www.football-data.co.uk). I have chosen Bundesliga First Division data from 1996 till 2016, as the 
+1995/96 season was the first season where the 3-points-for-a-win rule was adopted in Germany. Therefore, previous years wouldn't be comparable.
+
+The data there contains the full results for each game. I used Python to calculate the points, total scored and conceded goals for each team and its 
+corresponding standing for each year and wrote this to the file bundesliga_stats.csv. The file contains 378 observations (18 teams x 21 years) and looks as follows:
+
+year,standing,teams,points,diff,goals,goals_conceded
+1996,1,Dortmund,68,38.0,76.0,38.0
+1996,2,Bayern Munich,62,20.0,66.0,46.0
+1996,3,Schalke 04,56,9.0,45.0,36.0
+1996,4,M'gladbach,53,1.0,52.0,51.0
+......
+2016,14,Darmstadt,38,-15.0,38.0,53.0
+2016,15,Hoffenheim,37,-15.0,39.0,54.0
+2016,16,Ein Frankfurt,36,-18.0,34.0,52.0
+2016,17,Stuttgart,33,-25.0,50.0,75.0
+2016,18,Hannover,25,-31.0,31.0,62.0
+
+### First Idea
+
+
+
+The following [pdf](first_sketch.pdf) shows a first sketch of how I want to visualize the data. The idea is to display the data in a table where each row 
+is for the standing and each column for each year.
+
+The table contains the number of points for each standing/year. When selecting a standing (e.g. 1 for the champion or 16 to 18 for the relegated teams), a 
+line chart should display the points for that standing for all years. The aim is to show if there are trends over the years, for example the number of 
+points required to win the championship or avoid relegation to 2nd division.
 
 Finally, when hovering the mouse over a data entry the name of the team should be displayed.
 
 ### First Version
+
+When I first thought about how to visualize the data I imagined the table below the line chart. The line chart was supposed to display only the selected
+standing. However, when I plotted the data in Python I saw that displaying all lines at the same time allowed seeing similar patters over the years, especially
+in the lower point region. So I decided to plot all 18 lines at the same time and to allow the user to select a specific line by hovering the mouse over
+the corresponding row in the table.
+
+As displaying all lines at the same time required to increase the size if the SVG element, I also decided to invert the order of the table and the line chart: 
+Instead of having the line chart on top of the table I placed it below.
+
+For the first version I did not implement tooltips as they seemed rather complicated at first and I was not sure whether the team information was really
+required to convey the message about how the Bundesliga is drifting apart.
+
+Finally, I added the Bundesliga logo in the lower right bottom of the SVG element. The reason is that the logo is well known and seeing it might help people
+understand quicker what is displayed in the visualization.
 
 ### Final Version
 
@@ -43,6 +82,9 @@ This was something that I wanted to include from the beginning (see the first sk
 version. After the feedback however I decided to put it in the final version despite the headache it caused to implement it.
 
 ## Feedback
+
+I gathered feedback from 4 different people. Their background is different (2 engineers, 1 teacher, 1 photographer) and also their interest for soccer varies
+from "I have no clue about soccer and I don't really care" to "I know the Bundesliga by heart".
 
 ### Feedback Number 1:
 
@@ -81,8 +123,22 @@ version. After the feedback however I decided to put it in the final version des
 > I would assume we could take the average of point scores for a year which quite characterises the data for each point score.
 5. Is there something you don’t understand in the graphic?
 > It took sometime to realize what is shown in the table. For someone who doesn't follow soccer it is not really obvious what the numbers mean.
-	
-	
+
+### Feedback Number 4:
+
+1. What do you notice in the visualization? 
+>  It is pretty cool that you can highlight the lines by selecting a row
+2. What questions do you have about the data?
+> 
+3. What relationship do you notice?
+> The curves in the middle range are more homogeneous and closer together. The upper curves and also the lowest ranked curve shows bigger differences to the 
+> other lines 
+4. What do you think is the main takeaway from this visualization?  
+> 
+5. Is there something you don’t understand in the graphic?
+> At first I thought the points of the line chart were aligned with the table columns. I was confused not to find the right amount of points in the table. 
+> Also at a first glance I didn't know what the numbers represented.
+
 ## Resources
 
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
