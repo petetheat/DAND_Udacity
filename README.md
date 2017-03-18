@@ -15,6 +15,7 @@ The data is obtained from [www.football-data.co.uk](http://www.football-data.co.
 The data there contains the full results for each game. I used Python to calculate the points, total scored and conceded goals for each team and its 
 corresponding standing for each year and wrote this to the file bundesliga_stats.csv. The file contains 378 observations (18 teams x 21 years) and looks as follows:
 
+```
 year,standing,teams,points,diff,goals,goals_conceded
 1996,1,Dortmund,68,38.0,76.0,38.0
 1996,2,Bayern Munich,62,20.0,66.0,46.0
@@ -26,6 +27,7 @@ year,standing,teams,points,diff,goals,goals_conceded
 2016,16,Ein Frankfurt,36,-18.0,34.0,52.0
 2016,17,Stuttgart,33,-25.0,50.0,75.0
 2016,18,Hannover,25,-31.0,31.0,62.0
+``` 
 
 ### First Idea
 
@@ -129,7 +131,7 @@ from "I have no clue about soccer and I don't really care" to "I know the Bundes
 1. What do you notice in the visualization? 
 >  It is pretty cool that you can highlight the lines by selecting a row
 2. What questions do you have about the data?
-> 
+> It would be good to know which teams are behind the values. For instance, I'd be interested to see how Werder Bremen performed throughout the years.
 3. What relationship do you notice?
 > The curves in the middle range are more homogeneous and closer together. The upper curves and also the lowest ranked curve shows bigger differences to the 
 > other lines 
@@ -153,3 +155,5 @@ http://stackoverflow.com/questions/14567809/how-to-add-an-image-to-an-svg-contai
 http://bl.ocks.org/ilyabo/1373263
 
 http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
+
+http://bl.ocks.org/WandaChen/045d423c0d092ed73568
