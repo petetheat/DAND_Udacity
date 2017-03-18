@@ -70,6 +70,8 @@ understand quicker what is displayed in the visualization.
 
 [logo2]: first_chart.png "First version"
 
+The corresponding file is **`index_version1.html`**.
+
 ### Final Version
 
 The feedback that I got (see next section) as all four people I asked for feedback noticed exactly what I wanted to convey with this visualization: The 
@@ -103,6 +105,8 @@ version. After the feedback however I decided to put it in the final version des
 ![alt text][logo3]
 
 [logo3]: final_chart.png "First version"
+
+The corresponding file is **`index.html`**.
 
 ## Feedback
 
