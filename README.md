@@ -3,7 +3,8 @@ Peter Eisenschmidt
 
 ## Summary
 
-The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016.
+The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016 in order to show the growing gap
+between a handful of top teams and the remaining teams.
 
 ## Design
 
@@ -31,15 +32,13 @@ year,standing,teams,points,diff,goals,goals_conceded
 
 ### First Idea
 
-
-
-The following image shows a first sketch of how I want to visualize the data. 
+The following image shows a first sketch of how I wanted to visualize the data. 
 
 ![alt text][logo]
 
 [logo]: first_sketch.png "First sketch"
 
-The idea is to display the data in a table where each row 
+The idea was to display the data in a table where each row 
 is for the standing and each column for each year.
 
 The table contains the number of points for each standing/year. When selecting a standing (e.g. 1 for the champion or 16 to 18 for the relegated teams), a 
@@ -70,7 +69,10 @@ understand quicker what is displayed in the visualization.
 
 ### Final Version
 
-I noticed that it makes a huge difference if the person looking at the visualization is interested in soccer and follows the Bundesliga closely or if they
+The feedback that I got (see next section) as all four people I asked for feedback noticed exactly what I wanted to convey with this visualization: The 
+growing gap between a few top teams and the rest of the Bundesliga.
+
+However, I noticed that it makes a huge difference if the person looking at the visualization is interested in soccer and follows the Bundesliga closely or if they
 are not at all interested in it. The first group of people having a certain background knowledge understands immediately what the numbers in the table mean. 
 The second group of people struggles at first as the table doesn't mean anything to them. This is why I added an explanatory sentence above the table.
 
@@ -78,7 +80,7 @@ I added the source of the data at the bottom. That was not based on any of the r
 data comes from.
 
 Secondly, people remarked that when hovering over the table rows quickly the transition effect (I set the transition to 250 ms) caused a lot of rows to turn black.
-Looking more closely into that I found out that this effect was worse when using Internet Explorer 11 (I use Chrome and did all my checks there obviously without
+Looking more closely into that I found out that this effect was even worse when using Internet Explorer 11 (I use Chrome and did all my checks there obviously without
 checking the display on other browsers). As you don't know which browser your audience uses I decided to remove the transition effects completely. Comparing the
 first and final version that even in Chrome it is more pleasing to the eye without the transition effects.
 
@@ -159,15 +161,10 @@ from "I have no clue about soccer and I don't really care" to "I know the Bundes
 
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
 
-The code for the table creation is inspired by this example:
+I used the following websites as inspiration for the code:
 http://bl.ocks.org/LeeMendelowitz/11383724
-
-
 http://stackoverflow.com/questions/19757638/how-to-pivot-a-table-with-d3-js
 http://stackoverflow.com/questions/14567809/how-to-add-an-image-to-an-svg-container-using-d3-js
-
 http://bl.ocks.org/ilyabo/1373263
-
 http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
-
 http://bl.ocks.org/WandaChen/045d423c0d092ed73568
