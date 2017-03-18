@@ -65,17 +65,23 @@
 			// Add title
 			d3.select('body')
 			  .append('h2')
-			  .text("Bundesliga Standings between 1996 and 2016")
+			  .text("Bundesliga Standings between 1996 and 2016");
 			
+			// Explanatory text
 			d3.select('body')
 			  .append('p')
-			  .text('The following table contains the points for the German Bundesliga (first division) and the corresponding position for the years 1996 till 2016. The chart below depicts the evolution per standing over time.')
+			  .text('The following table contains the points for the German Bundesliga (first division) and the corresponding position for the years 1996 till 2016. The chart below depicts the evolution per standing over time.');
+			  
+			d3.select('body')
+			  .append('p')
+			  .text('Hover over the rows and lines to highlight and to get team information.');
 			
 			// Define the div for the tooltip
 			var div = d3.select("body").append("div")	
 						.attr("class", "tooltip")				
 						.style("opacity", 0);  
 			
+			// Define width and height to be used for the table and the svg element
 			var margin = 75,
                 width = 1400 - margin,
 				height = 500 - margin,
@@ -102,8 +108,7 @@
 						  .attr("xlink:href", "Bundesliga.png")
 						  .attr("width", 100)	
 						  .attr("x", width - 110)
-						  .attr("y", height+2*margin - 120)
-			
+						  .attr("y", height+2*margin - 120);
 			
 			
 			//////////////////////////////////////////////////
@@ -114,14 +119,13 @@
 				var values = [d.key];
 				
 				d.values.forEach(function(a) {
-					
 					values.push( {
 						'points' : a.points,
 					    'teams'  : a.teams,
 						'diff'   : a.diff
 					});
 				});
-				return values 
+				return values;
 			};
 			
 			// Helper function to highlight lines that are selected in the table
@@ -132,14 +136,14 @@
 				  .style('stroke-width', 1);
 				d3.selectAll('circle')
 				  .style('fill', 'gray')  
-				  .attr("r", 3)
+				  .attr("r", 3);
 				  
 				d3.selectAll('path#St' + x.key)
 				  .style('stroke', 'rgb(206, 4, 4)')
 				  .style('stroke-width', 2);
 				d3.selectAll('circle#St' + x.key)
 				  .style('fill', 'rgb(206, 4, 4)')  
-				  .attr("r", 5)
+				  .attr("r", 5);
 			};
 	
 			//////////////////////////////////////////////////
@@ -150,7 +154,6 @@
 								return d['standing'];
 						   })
 						   .entries(data);
-			
 						   
 			// get time and points range 
 			var time_extent = d3.extent(data, function(d) {
@@ -275,7 +278,7 @@
 							.attr('class', 'myCells')
 							.on("mouseover", function(d) {
 								if (d.length === 1 || d.length === 2) {
-									div.style("opacity", 0) // this indicates the first column (standing) for which no tooltip should be shown
+									div.style("opacity", 0); // this indicates the first column (standing) for which no tooltip should be shown
 								} else {
 									div.style("opacity", .9);		
 									div.html(d.teams + "<br/>Points: "  + d.points + "<br/>Goal difference: "  + d.diff)	
@@ -284,7 +287,7 @@
 								};
 							})					
 							.on("mouseout", function(d) {		
-								div.style("opacity", 0)
+								div.style("opacity", 0);
 							});							
 			
 			// Plot line charts
@@ -303,21 +306,21 @@
 				    
 					d3.selectAll('circle')
 					  .style('fill', 'gray')  
-				      .attr("r", 3)
+				      .attr("r", 3);
 				  
 					d3.selectAll('.standing_rows')
 					  .style("background", "white")
-					  .style("color", "black")
+					  .style("color", "black");
 
 					d3.select(this)
 					  .style('stroke', 'rgb(206, 4, 4)')
-					  .style('stroke-width', 2)
+					  .style('stroke-width', 2);
 															
-					var standing = this.id
+					var standing = this.id;
 					
 					d3.selectAll('circle#' + standing)
 					  .style('fill', 'rgb(206, 4, 4)')  
-					  .attr("r", 5)
+					  .attr("r", 5);
 					  
 					d3.select('tr#' + standing)
 					  .style("background", "steelBlue")
@@ -338,7 +341,6 @@
                   .attr("cy", function (a) { return point_scale(a['points']); })
 				  .attr('id', 'St'+ d.key)
 				  .on("mouseover", function(d) {
-					//debugger;
 					div.style("opacity", .9);		
 					div.html(d.teams + "<br/>Points: "  + d.points + "<br/>Goal difference: "  + d.diff)	
 					   .style("left", (d3.event.pageX) + "px")		
@@ -350,29 +352,29 @@
 				    
 					d3.selectAll('circle')
 					  .style('fill', 'gray')  
-				      .attr("r", 3)
+				      .attr("r", 3);
 				  
 					d3.selectAll('.standing_rows')
 					  .style("background", "white")
-					  .style("color", "black")
+					  .style("color", "black");
 
-					var standing = this.id
+					var standing = this.id;
 					  
 					d3.select('path#' + standing)
 					  .style('stroke', 'rgb(206, 4, 4)')
-					  .style('stroke-width', 2)
+					  .style('stroke-width', 2);
 															
 					
 					d3.selectAll('circle#' + standing)
 					  .style('fill', 'rgb(206, 4, 4)')  
-					  .attr("r", 5)
+					  .attr("r", 5);
 					  
 					d3.select('tr#' + standing)
 					  .style("background", "steelBlue")
 					  .style("color", "white");   
 				  })					
 				  .on("mouseout", function(d) {		
-					div.style("opacity", 0)
+					div.style("opacity", 0);
 				  }); 
 			});
 						
@@ -380,9 +382,9 @@
 			rows.on("mouseover", function(d) {
 						d3.selectAll(".standing_rows")
 						  .style("background", "white")
-						  .style("color", "black")
-						
-						tableRowClicked(d);
+						  .style("color", "black");
+						  
+						tableRowClicked(d);  
 						
 						d3.select(this)
 						  .style("background", "steelBlue")
@@ -397,7 +399,7 @@
   <script type="text/javascript">
 
 	// Load Bundesliga Statistics
-	d3.csv("bundesliga_stats.csv", bundesliga)
+	d3.csv("bundesliga_stats.csv", bundesliga);
   
   </script>
 </body>

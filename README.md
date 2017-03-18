@@ -3,8 +3,8 @@ Peter Eisenschmidt
 
 ## Summary
 
-The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016 in order to show the growing gap
-between a handful of top teams and the remaining teams.
+The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016. The goal is to show the growing gap
+between a handful of top teams and the remaining teams and the domination of a few teams.
 
 ## Design
 
@@ -38,14 +38,17 @@ The following image shows a first sketch of how I wanted to visualize the data.
 
 [logo]: first_sketch.png "First sketch"
 
-The idea was to display the data in a table where each row 
-is for the standing and each column for each year.
+The idea was to display the data in a table where each row is for the standing and each column for each year.
 
 The table contains the number of points for each standing/year. When selecting a standing (e.g. 1 for the champion or 16 to 18 for the relegated teams), a 
 line chart should display the points for that standing for all years. The aim is to show if there are trends over the years, for example the number of 
 points required to win the championship or avoid relegation to 2nd division.
 
 Finally, when hovering the mouse over a data entry the name of the team should be displayed.
+
+I chose a table and a line chart for the following reasons: A table as it allows looking up the precise number of points for a given year and a line chart as it
+allows determining trends in the data that are not directly visible in the table. I think as both chart types complement each other it is an efficient way to
+convey the message that the Bundesliga is drifting apart. 
 
 ### First Version
 
