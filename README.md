@@ -88,6 +88,8 @@ Thirdly, people said that it was good to highlight the line when hovering over a
 highlighting a row when hovering over a line. As all line are displayed at the same time you cannot see which position that line corresponds to. So, the 
 visualization now allows interactivity in both directions.
 
+I also aligned the circles of the line chart with the table columns, so that it makes it easier to find the year that you are looking at.
+
 Lastly, as people told me that they would like to know which teams are behind the numbers (to see for example which team has actually dominated the Bundesliga
 in recent years, as not everyone knows that) I added tooltips in both the table and the line chart that display the team name, the number of points, and
 also the goal difference as often this is needed as tie breaker.  

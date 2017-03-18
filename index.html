@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <style>
 	body { font: 12px Arial;
 	}
@@ -275,7 +274,7 @@
 							})
 							.attr('class', 'myCells')
 							.on("mouseover", function(d) {
-								if (d.length === 1) {
+								if (d.length === 1 || d.length === 2) {
 									div.style("opacity", 0) // this indicates the first column (standing) for which no tooltip should be shown
 								} else {
 									div.style("opacity", .9);		
