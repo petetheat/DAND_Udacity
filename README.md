@@ -152,7 +152,7 @@ from "I have no clue about soccer and I don't really care" to "I know the Bundes
 > The curves in the middle range are more homogeneous and closer together. The upper curves and also the lowest ranked curve shows bigger differences to the 
 > other lines 
 4. What do you think is the main takeaway from this visualization?  
-> 
+> About 20 years ago, the points were more evenly distributed over the table. In the past few years, the top 50% of points seem to be taken by 4-5 teams only and the bottom 50% of points are taken by the remaining 13-14 teams.
 5. Is there something you don’t understand in the graphic?
 > At first I thought the points of the line chart were aligned with the table columns. I was confused not to find the right amount of points in the table. 
 > Also at a first glance I didn't know what the numbers represented.
@@ -162,9 +162,15 @@ from "I have no clue about soccer and I don't really care" to "I know the Bundes
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
 
 I used the following websites as inspiration for the code:
+
 http://bl.ocks.org/LeeMendelowitz/11383724
+
 http://stackoverflow.com/questions/19757638/how-to-pivot-a-table-with-d3-js
+
 http://stackoverflow.com/questions/14567809/how-to-add-an-image-to-an-svg-container-using-d3-js
+
 http://bl.ocks.org/ilyabo/1373263
+
 http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
+
 http://bl.ocks.org/WandaChen/045d423c0d092ed73568
