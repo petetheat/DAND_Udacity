@@ -58,6 +58,10 @@ required to convey the message about how the Bundesliga is drifting apart.
 Finally, I added the Bundesliga logo in the lower right bottom of the SVG element. The reason is that the logo is well known and seeing it might help people
 understand quicker what is displayed in the visualization.
 
+![alt text][logo]
+
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+
 ### Final Version
 
 I noticed that it makes a huge difference if the person looking at the visualization is interested in soccer and follows the Bundesliga closely or if they
