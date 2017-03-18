@@ -13,7 +13,7 @@ The data is obtained from [www.football-data.co.uk](http://www.football-data.co.
 1995/96 season was the first season where the 3-points-for-a-win rule was adopted in Germany. Therefore, previous years wouldn't be comparable.
 
 The data there contains the full results for each game. I used Python to calculate the points, total scored and conceded goals for each team and its 
-corresponding standing for each year and wrote this to the file bundesliga_stats.csv. The file contains 378 observations (18 teams x 21 years) and looks as follows:
+corresponding standing for each year and wrote this to the file `bundesliga_stats.csv`. The file contains 378 observations (18 teams x 21 years) and looks as follows:
 
 ```
 year,standing,teams,points,diff,goals,goals_conceded
@@ -33,7 +33,13 @@ year,standing,teams,points,diff,goals,goals_conceded
 
 
 
-The following [pdf](first_sketch.pdf) shows a first sketch of how I want to visualize the data. The idea is to display the data in a table where each row 
+The following image shows a first sketch of how I want to visualize the data. 
+
+![alt text][logo]
+
+[logo]: first_sketch.png "First sketch"
+
+The idea is to display the data in a table where each row 
 is for the standing and each column for each year.
 
 The table contains the number of points for each standing/year. When selecting a standing (e.g. 1 for the champion or 16 to 18 for the relegated teams), a 
@@ -86,6 +92,10 @@ also the goal difference as often this is needed as tie breaker.
 
 This was something that I wanted to include from the beginning (see the first sketch) but at first it seemed too complicated in D3 so I left it out in the first
 version. After the feedback however I decided to put it in the final version despite the headache it caused to implement it.
+
+![alt text][logo]
+
+[logo]: final_chart.png "First version"
 
 ## Feedback
 
