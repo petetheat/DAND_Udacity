@@ -60,7 +60,7 @@ understand quicker what is displayed in the visualization.
 
 ![alt text][logo]
 
-[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+[logo]: first_chart.png "First version"
 
 ### Final Version
 
