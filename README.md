@@ -64,9 +64,9 @@ required to convey the message about how the Bundesliga is drifting apart.
 Finally, I added the Bundesliga logo in the lower right bottom of the SVG element. The reason is that the logo is well known and seeing it might help people
 understand quicker what is displayed in the visualization.
 
-![alt text][logo]
+![alt text][logo2]
 
-[logo]: first_chart.png "First version"
+[logo2]: first_chart.png "First version"
 
 ### Final Version
 
@@ -93,9 +93,9 @@ also the goal difference as often this is needed as tie breaker.
 This was something that I wanted to include from the beginning (see the first sketch) but at first it seemed too complicated in D3 so I left it out in the first
 version. After the feedback however I decided to put it in the final version despite the headache it caused to implement it.
 
-![alt text][logo]
+![alt text][logo3]
 
-[logo]: final_chart.png "First version"
+[logo3]: final_chart.png "First version"
 
 ## Feedback
 
