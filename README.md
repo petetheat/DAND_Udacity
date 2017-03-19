@@ -3,8 +3,8 @@ Peter Eisenschmidt
 
 ## Summary
 
-The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016. The goal is to show the growing gap
-between a handful of top teams and the remaining teams and the domination of a few teams.
+The visualization depicts the final standings of the first division of the German Bundesliga between 1996 and 2016 for the Top 5 Teams. The goal is to show how a single team 
+(Bayern Munich) has dominated the Bundesliga in the past 21 years.
 
 ## Design
 
@@ -72,7 +72,7 @@ understand quicker what is displayed in the visualization.
 
 The corresponding file is **`index_version1.html`**.
 
-### Final Version
+### Second Version
 
 The feedback that I got (see next section) as all four people I asked for feedback noticed exactly what I wanted to convey with this visualization: The 
 growing gap between a few top teams and the rest of the Bundesliga.
@@ -104,7 +104,24 @@ version. After the feedback however I decided to put it in the final version des
 
 ![alt text][logo3]
 
-[logo3]: final_chart.png "First version"
+[logo3]: second_chart.png "Second version"
+
+The corresponding file is **`index_version2.html`**.
+
+### Final Version
+
+After the first submission (see feedback below) I modified the visualization as follows: Firstly, I changed the header and the description to highlight that it
+is actually only one team that really dominates the Bundesliga, namely Bayern Munich. This is emphasized by the introductory text that summarizes quickly Bayern's 
+achievements over the past 21 years. 
+
+Secondly, to show that I moved the line chart up again above the table. As Bayern has always been in the top ranked teams, the line chart only shows the Top 5 teams now.
+In addition to that the team logos are displayed in order to allow the reader to see immediately Bayern's presence in the top ranks. 
+
+The table at the bottom allows the reader to explore more details about other teams as well. 
+
+![alt text][logo4]
+
+[logo4]: final_chart.png "Final version"
 
 The corresponding file is **`index.html`**.
 

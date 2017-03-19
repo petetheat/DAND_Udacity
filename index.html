@@ -8,7 +8,8 @@
 	}
 	h2 {
 	    text-align: center;
-		font-family: 14px Arial;
+		font-size: 22px;
+		font-family: Arial;
 	  }
 	th {
 		font-family: Helvetica;
@@ -19,6 +20,9 @@
 		font-size : 12px;
 		text-align:center; 
 		vertical-align:middle;
+	}
+	p {
+		font-size : 14px;
 	}
 	table {
 		border : 1px solid black;
@@ -65,21 +69,26 @@
 			// Add title
 			d3.select('body')
 			  .append('h2')
-			  .text("Bundesliga Standings between 1996 and 2016");
+			  .text("How Bayern Munich dominates the Bundesliga...");
 			
 			// Explanatory text
 			d3.select('body')
 			  .append('p')
-			  .text('The following table contains the points for the German Bundesliga (first division) and the corresponding position for the years 1996 till 2016. The chart below depicts the evolution per standing over time.');
-			  
+			  .text('No other team has been as successful as Bayern Munich: In the past 21 years always placed in the Top 4, 13 championships since 1996, 4 consecutive wins since 2013 with the 5th currently in the making...');
+			
 			d3.select('body')
 			  .append('p')
-			  .text('Hover over the rows and lines to highlight and to get team information.');
+			  .text('The chart shows the Top5 teams for the years 1996 till 2016. The table below contains the points for the German Bundesliga (first division) and the corresponding position for all teams. Hover over the rows and lines to highlight and to get team information.');
 			
 			// Define the div for the tooltip
-			var div = d3.select("body").append("div")	
+			var div = d3.select("body")
+			            .append("div")	
 						.attr("class", "tooltip")				
 						.style("opacity", 0);  
+						
+			var logos = d3.select("body")
+			              .append("div")
+						  .attr("class", "picture");		
 			
 			// Define width and height to be used for the table and the svg element
 			var margin = 75,
@@ -87,11 +96,7 @@
 				height = 500 - margin,
 				table_height = 300 - margin;
 			
-			// Create table (to be populated later)
-			var table = d3.select('body')
-			              .append('table')
-						  .attr("width", width)
-						  .attr("height", table_height);
+			var logo_width = 15;
 			
 			// create SVG
 			var svg = d3.select("body")
@@ -99,13 +104,21 @@
                         .attr("width", width)
                         .attr("height", height+2*margin);
 			
+			// Create table (to be populated later)
+			var table = d3.select('body')
+			              .append('table')
+						  .attr("width", width)
+						  .attr("height", table_height);
+			
+			
+			
 			
 			// Add Bundesliga Logo
 	        var imgs = svg.selectAll("image")
 	                      .data([0])		
 				          .enter()
 						  .append("svg:image")
-						  .attr("xlink:href", "Bundesliga.png")
+						  .attr("xlink:href", "logos/Bundesliga.png")
 						  .attr("width", 100)	
 						  .attr("x", width - 110)
 						  .attr("y", height+2*margin - 120);
@@ -170,6 +183,8 @@
 				return d['points'];
 			});
 			
+			points_extent[0] = "48"; // change this manually to display only the Top 5
+			
 			// Define table header
 			var header = ['Standing'];
 			
@@ -226,6 +241,15 @@
 			  .attr("dy", "1em")
 			  .style("text-anchor", "middle")
 			  .text("Points"); 
+			
+			d3.select("svg")
+			  .append("text")      
+			  .attr("x", width/2)
+              .attr("y",  margin/2 )
+			  .style("text-anchor", "middle")
+			  .style("font-size", "20px")
+			  .style("font-weight", "bold")
+			  .text("Top 5 Teams");
 			
 			// Source text
 			d3.select("svg")
@@ -292,7 +316,10 @@
 			
 			// Plot line charts
 			
+			var teamDisplay = 5 // Number of teams to display
+			
 			nested.forEach(function(d,i) {
+			  if ( i < teamDisplay) {
 				d3.select('svg')
 				  .append('path')
 				  .attr("class", "line")
@@ -325,6 +352,19 @@
 					d3.select('tr#' + standing)
 					  .style("background", "steelBlue")
 					  .style("color", "white");
+				  })
+				  .on("mouseout", function(a) {
+				    d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				  
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+					  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 				  });
 			
 				// add circles
@@ -375,7 +415,49 @@
 				  })					
 				  .on("mouseout", function(d) {		
 					div.style("opacity", 0);
+					
+					d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				  
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+					  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 				  }); 
+				  
+			 }	  
+			});
+			
+			// initialize counter to place team logos 
+			var posCounter = 1; 
+			
+			// add logos
+			nested.forEach(function(d,i) {
+				if ( i < teamDisplay) {
+					var imgs = svg.selectAll('image_' + i.toString())
+	                      .data(d.values)		
+				          .enter()
+						  .append("svg:image")
+						  .attr("xlink:href", function(a) {
+							return "logos/" + a.teams + ".png";
+						  })
+						  .attr("height", logo_width)	
+						  .attr("x", function (a, i) { 
+							var format = d3.time.format('%Y');
+							if (i == 20) 
+								{ posCounter+=1;};
+							
+							if (posCounter == 1 || posCounter == 3 || posCounter == 5) {
+								return time_scale(format.parse(a['year']))-1.1*logo_width; 
+							} else {
+								return time_scale(format.parse(a['year']))+.2*logo_width;
+							};})
+						  .attr("y", function (a) { return point_scale(a['points'])-.7*logo_width; });
+				};
 			});
 						
 			// Define mouse over and click functions to highlight rows and select plot data
@@ -389,6 +471,19 @@
 						d3.select(this)
 						  .style("background", "steelBlue")
 						  .style("color", "white");
+			});
+			
+			rows.on("mouseout", function(d) {
+						d3.selectAll(".standing_rows")
+						  .style("background", "white")
+						  .style("color", "black");
+						
+						d3.selectAll('.line')
+						  .style('stroke', 'gray')
+						  .style('stroke-width', 1);
+						d3.selectAll('circle')
+						  .style('fill', 'gray')  
+						  .attr("r", 3);						
 			});
 			
 			
