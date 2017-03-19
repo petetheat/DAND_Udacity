@@ -166,6 +166,21 @@ from "I have no clue about soccer and I don't really care" to "I know the Bundes
 > At first I thought the points of the line chart were aligned with the table columns. I was confused not to find the right amount of points in the table. 
 > Also at a first glance I didn't know what the numbers represented.
 
+### Feedback First Submission:
+
+The visualization looks awesome! But what is the message you want to convey? I couldn't quickly infer from looking at the visualization as a standalone project (without the readme.).
+
+The goal in this project is that you find a story to tell first, and then use a visualization in the most effective way to tell it to the user. There may be a lot of interesting findings in the data presented, but it is not clear to the reader which one.
+
+As general advices on improving communication:
+* Use text along with the plots. Besides the introductory text, which is very good, use text to direct your reader towards the main message. Add anedoctes and interesting facts to make it even more appealing for the reader.
+* Your title needs to reflect the explanatory aspect of the visualization, for example, "Bayern Munich and Dortmund dominate Bundesliga" (just an example, I noticed they won in the last years, I don't particularly favor any team). The current title "Bundesliga Standings between is 1996 and 2016" is 
+suitable for an exploratory visualization. 
+
+Considering the goal is to "to show the growing gap between a handful of top teams and the remaining teams and the domination of a few teams.", as described on the readme, more specific advices:
+* The goal is to show dominance of top teams, but the team information is hiding in a tooltip, with no other visual encoding. The visual encoding hierarchy should follow the importance of each variable for the visualization message - since team is very important, it should be high up in the hierarchy. As a suggestion, if you want to show 2 or 3 teams dominated in the last year, add a small logo of the team above or below the dot in the first 3 lines. This way it will be easier to visualize if a particular team or groups teams have dominated the last years. This is just a suggestion, any other visual encoding will do fine as well.
+* The visualization is too cluttered, it feels overplotted. Since you are aiming to show dominance in the top position, you can focus on the top standings. The lower part of the visualization, around the 11th standing to the bottom, doesn't add a lot to the message.
+
 ## Resources
 
 The data is obtained from http://www.football-data.co.uk/ . It was processed using Python in order to get the final standings per year and to create the csv file used for the visualization.
