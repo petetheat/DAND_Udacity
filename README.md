@@ -121,7 +121,7 @@ The table at the bottom allows the reader to explore more details about other te
 
 ![alt text][logo4]
 
-[logo4]: third_chart.png "Final version"
+[logo4]: third_chart.png "Third version"
 
 The corresponding file is **`index_version3.html`**.
 
@@ -137,7 +137,7 @@ Lastly, as only the first 5 standings are displayed the corresponding rows of th
 
 ![alt text][logo5]
 
-[logo5]: third_chart.png "Final version"
+[logo5]: final_chart.png "Final version"
 
 The corresponding file is **`index.html`**.
 
