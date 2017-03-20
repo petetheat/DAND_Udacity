@@ -108,7 +108,7 @@ version. After the feedback however I decided to put it in the final version des
 
 The corresponding file is **`index_version2.html`**.
 
-### Final Version
+### Third Version
 
 After the first submission (see feedback below) I modified the visualization as follows: Firstly, I changed the header and the description to highlight that it
 is actually only one team that really dominates the Bundesliga, namely Bayern Munich. This is emphasized by the introductory text that summarizes quickly Bayern's 
@@ -121,7 +121,23 @@ The table at the bottom allows the reader to explore more details about other te
 
 ![alt text][logo4]
 
-[logo4]: final_chart.png "Final version"
+[logo4]: third_chart.png "Final version"
+
+The corresponding file is **`index_version3.html`**.
+
+### Final Version
+
+The feedback from the second review was that the visualization was potentially confusing (see details in the feedback section). I therefore changed the title of the line chart to **Top 5 Standings** instead of **Top 5 Teams**,
+as this is what is actually displayed.
+
+Also, as the message is how Bayern Munich dominates the Bundesliga, only Bayern's logo is now displayed at its corresponding standings. This allows seeing immediately where Bayern was placed in the past 21 years. To make sure that
+everyone understand what this logo means, I have added it on top of the line chart big enough to see what it represents.
+
+Lastly, as only the first 5 standings are displayed the corresponding rows of the table are highlighted in the same color as the lines.
+
+![alt text][logo5]
+
+[logo5]: third_chart.png "Final version"
 
 The corresponding file is **`index.html`**.
 
@@ -197,6 +213,19 @@ suitable for an exploratory visualization.
 Considering the goal is to "to show the growing gap between a handful of top teams and the remaining teams and the domination of a few teams.", as described on the readme, more specific advices:
 * The goal is to show dominance of top teams, but the team information is hiding in a tooltip, with no other visual encoding. The visual encoding hierarchy should follow the importance of each variable for the visualization message - since team is very important, it should be high up in the hierarchy. As a suggestion, if you want to show 2 or 3 teams dominated in the last year, add a small logo of the team above or below the dot in the first 3 lines. This way it will be easier to visualize if a particular team or groups teams have dominated the last years. This is just a suggestion, any other visual encoding will do fine as well.
 * The visualization is too cluttered, it feels overplotted. Since you are aiming to show dominance in the top position, you can focus on the top standings. The lower part of the visualization, around the 11th standing to the bottom, doesn't add a lot to the message.
+
+### Feedback Second Submission:
+
+You've made some excellent design choices so far. I love the chart choices, the interactivity between the chart, the logo icons and all your clear, accessible labels. Fabulous.
+
+However, I think currently your graphic is potentially very confusing. It took me about 10 minutes of looking at the chart, the README file and Googling football team logos to understand what is going on. 
+Obviously I am not a football fan!
+
+My conclusion is the main problem is a disconnect between the title - Top 5 Teams - and the line chart. From the title, I automatically assumed that each line was a team so I was trying to work out what the 
+logos meant and whether some of them were in the wrong position. There are in fact logos for 12 teams (possibly more if I've missed one) on the line chart! I have now worked out that the lines 
+represent the positions or standings!
+
+Your main message is How Bayern Munich dominates the Bundesliga.... You need to make sure your charts tell this story loud and clear.
 
 ## Resources
 
