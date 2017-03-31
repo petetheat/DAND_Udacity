@@ -1,0 +1,1056 @@
+Airline Data by Peter Eisenschmidt
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(knitr)
+library(maps)
+library(geosphere)
+library(RColorBrewer)
+library(GGally)
+library(lubridate)
+```
+
+# Dataset Description
+
+The dataset that is analyzed for this project is airline on-time performance data. The dataset used here is a subset of the full dataset which is available on this website:
+
+http://stat-computing.org/dataexpo/2009/
+
+This subset includes 123,496 flights from 1987 until 2008 from 29 different airlines and 317 airports
+
+Furthermore, in order to visualize the flights, additional airport data is obtained from:
+
+http://openflights.org/data.html
+
+The longitude and latitude of departure and destination airport are added to the first dataset.
+
+```{r echo=FALSE, Load_the_Data, message=FALSE, warning=FALSE}
+setwd('C:/Users/tsb6zw/Documents/Udacity/scripts/P4/Project')
+airlines <- read.csv('airlinesmall.csv')
+airports <- read.csv('airports.dat')
+
+airlines <- merge(airlines, airports[,c("IATA.FAA", "Lat", "Lon")], 
+                  by.x="Origin", by.y="IATA.FAA", sort=FALSE)
+airlines <- rename(airlines, OriginLat=Lat)
+airlines <- rename(airlines, OriginLon=Lon)
+airlines <- merge(airlines, airports[,c("IATA.FAA", "Lat", "Lon")], 
+                  by.x="Dest", by.y="IATA.FAA", sort=FALSE)
+airlines <- rename(airlines, DestLat=Lat)
+airlines <- rename(airlines, DestLon=Lon)
+```
+
+# Data Wrangling
+
+Before starting the EDA, it is necessary to perform some data wrangling with the dataset. The first step is to create a `Date` variable from the parameters `Year`, `Month`, and `Day`.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines$Date <- ISOdate(airlines$Year,airlines$Month,airlines$DayofMonth)
+```
+
+Secondly, the values of Departure and Arrival Delay need to be checked if they make sense or could contain incorrect values. Here is the summary of the two parameters.
+
+```{r echo=FALSE, Univariate_Plots, message=FALSE, warning=FALSE}
+summary(airlines$DepDelay)
+summary(airlines$ArrDelay)
+```
+
+The maximum departure delay is 1438 min, i.e. 24h. The arrival delay for this flight, however, is -8 min:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+maxDelay <- (airlines$DepDelay == 1438.) & (!is.na(airlines$DepDelay))
+minDelay <- (airlines$DepDelay == -1036.) & (!is.na(airlines$DepDelay))
+airlines[maxDelay,]
+
+airlines[maxDelay,]$DepDelay <-airlines[maxDelay,]$DepTime - airlines[maxDelay,]$CRSDepTime
+```
+Departing with an almost 24h delay and arriving 8 min early seems unrealistic. Looking at the scheduled and the actual depature time (19:02 and 19:00 respectively), it seems that the flight left in fact 2 minutes early and not delayed by 24h. The value is therefore corrected to the difference between scheduled and actual departure time.
+
+The minimum departure delay is -1036 min (17h). Looking at the flight in question, it seems that the flight was scheduled for 8:40pm but left at 3:24 am (the following day): 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines[minDelay,]
+airlines[minDelay,]$DepDelay <- 404
+airlines[minDelay,]$ActualElapsedTime <- 210
+```
+So, the departure delay should actually be 404 min. Also the parameter `ActualElapsedTime` (1650 min = 27.5h) is incorrect and should be 210 min.
+
+Similary, the second highest departure delay of 1433 min is incorrect, as the scheduled departure time was 7:05pm and the actual departure time 6:58pm. So, the departure delay in the data set assumes a delay of almost 24h whereas the flight actually left 7 min early:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+maxDelay <- (airlines$DepDelay == 1433.) & (!is.na(airlines$DepDelay))
+minDelay <- (airlines$DepDelay == -60.) & (!is.na(airlines$DepDelay))
+
+airlines[maxDelay,]
+
+airlines[maxDelay,]$DepDelay <- -7
+```
+
+The remaining departure delays and all arrival delays seem to be correct.
+
+Furthermore, the parameter `DeltaTime` is introduced as the difference between the actual elapsed time and the scheduled elapsed time.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines$DeltaTime <- airlines$ActualElapsedTime - airlines$CRSElapsedTime
+```
+
+Lastly, the parameter `Route` is created from the parameters `Origin` and `Dest`.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines$Route <- paste(airlines$Origin,airlines$Dest, sep="-")
+```
+
+
+
+# Univariate Plots Section
+
+The first step is to look at departure and arrival delays, as this is what the dataset is about. Therefore, histograms of both departure and arrival delay are plotted. Also, the difference between scheduled and actual flight time is plotted as a histogram. Finally, a histogram of the newly created date variable is shown.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(DepDelay), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#F79420')), binwidth = 5)+
+  ggtitle("Departure Delay")+
+  xlab("Delay / min")+
+  scale_x_continuous(breaks=seq(-100,1100,100))
+
+summary(airlines$DepDelay)
+
+ggplot(aes(ArrDelay), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#405dbc')), binwidth = 5)+
+  ggtitle("Arrival Delay")+
+  xlab("Delay / min")+
+  scale_x_continuous(breaks=seq(-100,1100,100))
+
+summary(airlines$ArrDelay)
+
+ggplot(aes(DeltaTime), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#258c13')), binwidth = 5)+
+  ggtitle("Difference between actual elapsed time and scheduled time")+
+  xlab("Time / min")
+
+summary(airlines$DeltaTime)
+
+ggplot(aes(Date), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#258c13')))+
+  ggtitle("Date")+
+  xlab("Date")
+
+```
+
+The histograms of delays are negatively skewed; the departure delay more than the arrival delay. This makes sense as a negative departure delay indicates a departure time before the scheduled departure time, which does not happen very often.
+
+Most flights depart with a delay between -10 and +25 min.
+
+Also, the arrival delay is negatively skewed but not as much as the departure delay. This also makes sense, as an early arrival is more likely than an early departure. But due to airtraffic constraints an early arrival is not always possible, especially at bigger hubs, so it is not surprising to see more delays than early arrivals.
+
+Most flights arrive with a delay between -20 and +40 min.
+
+It can already be seen that more flights depart on time than arrive on time; the arrival delay distribution is more spread out than the departure delay distribution.
+
+The delta flight time is more normally distributed, with a few outliers in the positive range. 
+
+The question therefore is whether the arrival delay can be directly attributed to the departure delay or if there are other parameters that impact arrival delay. This will be looked at in the bivariate section.
+
+The date variable shows only few flights in 1987 (only October till December). Then from 1988 till 1998 the number of flights there is an approximately even number of flights per year. Following 1999 there is a strong increase (with a drop in 2002 and 2008).
+
+Given the extreme outliers, a zoom is made for the departure and arrival delay and delta time  histograms.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(DepDelay), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#F79420')), binwidth = 3)+
+  ggtitle("Departure Delay")+
+  xlab("Delay / min")+
+  scale_x_continuous(breaks=seq(-25,100,5), limits = c(-25,100))
+
+ggplot(aes(ArrDelay), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#405dbc')), binwidth = 3)+
+  ggtitle("Arrival Delay")+
+  xlab("Delay / min")+
+  scale_x_continuous(breaks=seq(-50,100,5), limits = c(-50,100))
+
+ggplot(aes(DeltaTime), data=airlines)+
+  geom_histogram(aes(color=I('black'), fill=I('#258c13')), binwidth = 3)+
+  ggtitle("Difference between actual elapsed time and scheduled time")+
+  xlab("Time / min")+
+  scale_x_continuous(breaks=seq(-50,50,5), limits = c(-50,50))
+```
+
+The next thing is to have a look at the number of flights per airline.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_airline <- airlines %>%
+  group_by(UniqueCarrier) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            sum_dep_delay = sum(DepDelay, na.rm = TRUE),
+            sum_arr_delay = sum(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(n)
+
+ggplot(aes(x=reorder(UniqueCarrier, -n), y=n),data=airlines.by_airline)+
+  geom_bar(stat="identity")
+```
+
+Delta Air Lines (DL) has the highest number of flights in the dataset, followed by Southwest (WN), American Airlines (AA), US Airways (US), and United Air Lines (UA).
+
+Now the busiest departure and arrival airports are investigated by sorting the airports by origin and destination in descending order.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Order by origin (departure airport)
+airlines.by_origin <- airlines %>%
+  group_by(Origin) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            sum_dep_delay = sum(DepDelay, na.rm = TRUE),
+            sum_arr_delay = sum(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(n)
+
+# bar plot for all departure airports
+ggplot(aes(x=reorder(Origin, -n), y=n),data=airlines.by_origin)+
+  geom_bar(stat="identity")
+
+# Order by destination airport
+airlines.by_dest <- airlines %>%
+  group_by(Dest) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            sum_dep_delay = sum(DepDelay, na.rm = TRUE),
+            sum_arr_delay = sum(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(n)
+
+# bar plot for destination airports
+ggplot(aes(x=reorder(Dest, -n), y=n),data=airlines.by_dest)+
+  geom_bar(stat="identity")
+```
+
+Due to the number of airports (317 different departure and destination airports), it is not possible to see which airports are the busiest. Therefore, subsets are created for airports with more than 2000 flights.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_origin_small <- subset(airlines.by_origin, n >= 2000)
+airlines.by_dest_small <- subset(airlines.by_dest, n >= 2000)
+
+ggplot(aes(x=reorder(Origin, -n), y=n),data=airlines.by_origin_small)+
+  geom_bar(stat="identity")
+
+ggplot(aes(x=reorder(Dest, -n), y=n),data=airlines.by_dest_small)+
+  geom_bar(stat="identity")
+```
+
+The three busiest airports in the dataset are:
+
+  1. Chicago O'Hare (ORD)
+  2. Hartfield-Jackson, Atlanta (ATL)
+  3. Dallas/Fort Worth (DFW)
+
+The next step is to look at the most frequent routes.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_route <- airlines %>%
+  group_by(Route) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            sum_dep_delay = sum(DepDelay, na.rm = TRUE),
+            sum_arr_delay = sum(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(n)
+
+ggplot(aes(x=reorder(Route, -n), y=n),data=airlines.by_route)+
+  geom_bar(stat="identity")
+```
+
+Again, due to the high number of different routes (5686), it is impossible to see details, so a zoom on the routes which are frequented more than 250 times is made.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_route_small <- subset(airlines.by_route, n >= 250)
+
+ggplot(aes(x=reorder(Route, -n), y=n),data=airlines.by_route_small)+
+  geom_bar(stat="identity")
+```
+
+It can be seen that the busiest route is not out of the busiest airports but between San Francisco (SFO) and Los Angeles (LAX). LAX accounts for the 6 busiest routes (counting return flights as well) although it is only the 4th busiest airport. SFO is only number 10 in the airport list.
+
+Finally, the number of flights per year, month, and day of the week are investigated.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=Year),data=airlines)+
+  geom_bar()
+
+ggplot(aes(x=Month),data=airlines)+
+  geom_bar()+
+  scale_x_continuous(limits = c(0,13), breaks=seq(1,12,1))
+
+ggplot(aes(x=DayOfWeek),data=airlines)+
+  geom_bar()+
+  scale_x_continuous(limits = c(0,8), breaks=seq(1,7,1))
+```
+
+In 1987, only flights between October 1 and December 31 are included in the dataset, whereas for the other years the entire year is available, hence the low number of flights in 1987.
+
+It can be seen that the number of flights remained approximately constant until 1995. From then on, the number of flights continued to increase each year (with a drop in 2002).
+
+Throughout the year, the number of flights varies little: 
+
+  * December/January are busy followed by a drop in February
+  * July/August are busy again, followed by a drop in September
+  * Interestingly, October has the highest number of flights
+
+On weekends, there are less flights than during the working week. Especially on Saturdays, the number of flights are lower.
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+The dataset contains 123,496 flights from 29 different airlines. The flights took place between October 1, 1987 and December 31, 2008. Only domestic flights in the US are included; no international flights or international carriers are in this dataset. 
+
+The flights were performed between 317 different airports on a total of 5686 different routes.
+
+The dataset includes 36 variables (29 in the original dataset and 7 were added during the EDA). 
+
+It has to be noted that this dataset is only a subset; the full dataset for this time frame contains 120 million flights.
+
+
+
+### What is/are the main feature(s) of interest in your dataset?
+
+The main features are departure and arrival delay, as they define the airline on-time performance. It is interesting to see what drives the delays.
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+Other interesting features are the airline, the origin and destination, and the time, as they all could have an impact on the on-time performance:
+
+  * Are certain airlines more on time than others?
+  * Does the airport and route congestion affect delays?
+  * Are the certain times of the year/month/week with higher delays?
+
+### Did you create any new variables from existing variables in the dataset?
+
+A date variable was created from the existing parameters `Year`, `Month`, and `Day`. Furthermore, origin and destination latitude and longitude were added from another dataset. Lastly, the parameter `Route` was created from the parameters `Origin` and `Dest`.
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+It was found that some delays had incorrect values and needed to be corrected. For details, please refer to the previous Section *Data Wrangling*.
+
+# Bivariate Plots Section
+
+The first step in the bivariate analysis is to create a scatter matrix of selected parameters. Please note that only the following parameters are kept:
+
+  * Departure Delay
+  * Arrival Delay
+  * Delta Elapsed Time
+  * Distance between origin and destination
+  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+keep <- c("DepDelay", "ArrDelay", "DeltaTime", "Distance")
+airlines_reduced <- airlines[keep]
+
+ggpairs(airlines_reduced, 
+  lower = list(continuous = wrap("points", shape = I('.'))), 
+  upper = list(combo = wrap("box", outlier.shape = I('.'))),
+  cardinality_threshold = 29)
+```
+
+Several interesting features need to be mentioned:
+
+  * Departure and arrival delay seem strongly correlated (correlation coefficienct of .905)
+  * Arrival delay and Delta Elapsed time are moderately correlated (.456) but no correlation between Delta Time and Departure Delay
+  * No correlation between distance and delay, but larger delays occur for shorter distances
+
+A second scatter matrix is produced with:
+
+  * Departure Delay
+  * Arrival Delay
+  * Lat/Longitude of both origin and destination
+
+The aim is to see if there are regions with higher delays than others.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+keep <- c("DepDelay", "ArrDelay", "OriginLat", "OriginLon", 
+          "DestLat", "DestLon")
+airlines_reduced2 <- airlines[keep]
+
+ggpairs(airlines_reduced2, 
+  lower = list(continuous = wrap("points", shape = I('.'))), 
+  upper = list(combo = wrap("box", outlier.shape = I('.'))),
+  cardinality_threshold = 29)
+```
+
+The second scatter matrix does not indicate any other correlation other than the one already described previously. 
+
+As seen in the first scatter matrix, it is interesting to see if and how departure and arrival delay are correlated. Therefore, scatterplots of arrival vs. departure delay are produced.
+
+```{r echo=FALSE, Bivariate_Plots, message=FALSE, warning=FALSE}
+ggplot(aes(x=DepDelay, y=ArrDelay), data=airlines)+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.3, shape=21)+
+  ggtitle("Arrival Delay vs. Departure Delay")+
+  xlab("Departure Delay / min")+
+  ylab("Arrival Delay / min")
+```
+
+A zoom is done on smaller delays (please note that a log scale does not work here, as there are negative delays that could not be captured on a log scale).
+
+```{r echo=FALSE, Bivariate_Plots2, message=FALSE, warning=FALSE}
+ggplot(aes(x=DepDelay, y=ArrDelay), data=airlines)+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.3, shape=21)+
+  scale_x_continuous(limits = c(-100,500),breaks=seq(-100,500,50))+
+  scale_y_continuous(limits = c(-100,500),breaks=seq(-100,500,50))+
+  ggtitle("Arrival Delay vs. Departure Delay (Zoom)") +
+  xlab("Departure Delay / min")+
+  ylab("Arrival Delay / min")
+```
+
+These two plots show the linear trend between departure and arrival delay. They also show that there is a bigger scatter when the departure delay is small.
+
+The next plot shows the actual flight time vs. the scheduled flight time.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=CRSElapsedTime, y=ActualElapsedTime, color=Dest), data=airlines)+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.15, shape=21)+
+  scale_x_continuous(breaks=seq(0,700,50))+
+  ggtitle("Actual elapsed time vs. scheduled time")+
+  xlab("Scheduled elapsed time / min")+
+  ylab("Actual elapsed time / min")
+```
+
+It can be seen that the majority of flights has a scheduled time between 25 and 400 min. Fewer flights have scheduled times of up to 650 min (~11h).
+
+The interesting part about this plot is that the deviation from the scheduled time tends to decrease for longer flights.
+
+Now, the arrival delay is plotted versus the Delta Elapsed Time (this showed a moderate correlation in the first scatter matrix).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=DeltaTime, y=ArrDelay), data = airlines)+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.05, shape=21)+
+  ggtitle("Arrival Delay vs. Delta time")+
+  xlab("Delta time (Actual minus Scheduled) / min")+
+  ylab("Arrival Delay / min")+
+  scale_y_continuous(breaks=seq(-100,1100,100))
+```
+
+A zoom is also made to exclude outliers.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=DeltaTime, y=ArrDelay), data = airlines)+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.05, shape=21)+
+  ggtitle("Arrival Delay vs. Delta time (Zoom)")+
+  xlab("Delta time (Actual minus Scheduled) / min")+
+  ylab("Arrival Delay / min")+
+  scale_y_continuous(breaks=seq(-100,500,25), limits = c(-100,500))+
+  scale_x_continuous(breaks=seq(-70,100,10), limits = c(-70,100))
+```
+
+The linear trend that can be seen here are the on-time departures. The following plot only shows flights which leave between -2 and +2 minutes of their scheduled departure time (41,076 flights).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=DeltaTime, y=ArrDelay), data = subset(airlines,DepDelay<2 & DepDelay>-2))+
+  geom_point(aes(fill=I('#e8992c'), color=I('black')),alpha=.05, shape=21)+
+  ggtitle("Arrival Delay vs. Delta time for on-time departures")+
+  xlab("Delta time (Actual minus Scheduled) / min")+
+  ylab("Arrival Delay / min")+
+  scale_y_continuous(breaks=seq(-100,1100,100))
+```
+
+In the previous section, the busiest airports and airlines were determined. Now, it will be interesting to see if these airports also have the largest delays, i.e. if there is a correlation between number of flights in and out of an airport and the delay.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Use subset for busiest airports
+ggplot(aes(x=reorder(Origin, -mean_dep_delay), y=mean_dep_delay),data=airlines.by_origin_small)+
+  geom_bar(stat="identity")+
+  ggtitle("Airports with more than 2000 flights")
+
+# Use subset for busiest airports
+ggplot(aes(x=reorder(Dest, -mean_arr_delay), y=mean_arr_delay),data=airlines.by_dest_small)+
+  geom_bar(stat="identity")+
+  ggtitle("Airports with more than 2000 flights")
+```
+
+It can be seen that the airport with the largest departure and arrival delay is Newark Liberty International Airport (EWR), which is not the busiest airport (see the univariate section). For the departure delay the second and third highest delay is at Chicago O'Hare (ORD) and Hartfield-Jackson Atlanta (ATL) which are the two busiest airports. Dallas/Fort Worth (DFW), number 3 of busiest airports, is only on rank 18 and 9 for mean departure and arrival delays respectively. The bar plots alone do not allow seeing if there is a correlation.
+
+Therefore, to check this in more detail, the average delay per airport is plotted versus the number of flights in and out of this airport.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Delay vs. number of flights
+ggplot(aes(x=n, y=value),data=airlines.by_origin)+
+  geom_point(aes(y=mean_dep_delay, colour="Departure Delay"))+
+  geom_point(aes(y=mean_arr_delay, colour="Arrival Delay"))+
+  ggtitle("All airports")
+
+# Delay vs. number of flights / only airports with more than 2,000 flights
+ggplot(aes(x=n, y=value),data=airlines.by_origin_small)+
+  geom_point(aes(y=mean_dep_delay, colour="Departure Delay"))+
+  geom_point(aes(y=mean_arr_delay, colour="Arrival Delay"))+
+  ggtitle("Airports with more than 2000 flights")
+
+```
+
+This shows that there is no clear correlation between number of flights and average delay at a given airport; there must be other factors influencing the delay.
+
+The next step is to see if the delay varies from airline to airline or if all airlines have similar delays. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(aes(x=reorder(UniqueCarrier, -mean_dep_delay), y=mean_dep_delay),data=airlines.by_airline)+
+  geom_bar(stat="identity")
+
+ggplot(aes(x=reorder(UniqueCarrier, -mean_arr_delay), y=mean_arr_delay),data=airlines.by_airline)+
+  geom_bar(stat="identity")
+```
+
+The three airlines with the maximum departure delay are:
+
+  * Mesa Airlines (YV)
+  * JetBlue (B6)
+  * Atlantic Southeast Airlines (EV)
+  
+The maximum arrival delay is for the following carriers: 
+
+  * Mesa Airlines (YV)
+  * JetBlue (B6)
+  * Piedmont Aviation Inc. (PI)
+
+Interestingly, all airlines have positive delays except Hawaiian Airlines (HA).
+
+Similarly to the airports, the busiest airlines are not the ones with the largest delays. This is also confirmed by the following plot (average delay vs. number of flights for each airline).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=n, y=value),data=airlines.by_airline)+
+  geom_point(aes(y=mean_dep_delay, colour="Departure Delay"))+
+  geom_point(aes(y=mean_arr_delay, colour="Arrival Delay"))
+```
+
+
+In order to go into more detail per airline, it is interesting to look at statistics other than the mean. Therefore, boxplots are created for each airline.
+
+
+```{r echo=FALSE, Bivariate_Plots4, message=FALSE, warning=FALSE}
+ggplot(aes(x=UniqueCarrier, y=DepDelay), data=airlines)+
+  geom_boxplot()+
+  ggtitle("Departure Delay by Carrier")+
+  xlab("Airline Code")+
+  ylab("Departure Delay / min")
+
+ggplot(aes(x=UniqueCarrier, y=ArrDelay), data=airlines)+
+  geom_boxplot()+
+  ggtitle("Arrival Delay by Carrier")+
+  xlab("Airline Code")+
+  ylab("Arrival Delay / min")
+```
+
+The plots show that a lot of points are outliers (outside 1.5 IQR). So, the same plots are created zoomed in. Here, the mean delay is also plotted.
+
+```{r echo=FALSE, Bivariate_Plots5, message=FALSE, warning=FALSE}
+ggplot(aes(x=UniqueCarrier, y=DepDelay), data=airlines)+
+  geom_boxplot(aes(fill=I('#40bc50'), color=I('black')))+
+  geom_point(aes(color=I('#db513f')), shape=0,stat="summary", fun.y=mean)+
+  coord_cartesian(ylim = c(-25,40))+
+  ggtitle("Departure Delay by Carrier (Zoom)")+
+  xlab("Airline Code")+
+  ylab("Departure Delay / min")
+
+ggplot(aes(x=UniqueCarrier, y=ArrDelay), data=airlines)+
+  geom_boxplot(aes(fill=I('#db513f'), color=I('black')))+
+  geom_point(aes(color=I('#0a6b17')), shape=0,stat="summary", fun.y=mean)+
+  coord_cartesian(ylim = c(-40,40))+
+  ggtitle("Arrival Delay by Carrier (Zoom)")+
+  xlab("Airline Code")+
+  ylab("Arrival Delay / min")
+```
+
+This shows that the average delay per airline is ~8 min. The median delay however is very close to zero. Another interesting fact is that the lower and upper quartile (i.e. 50% of the flights) enclose departure delays of approximately -5 to +12 min and arrival delays of -12 to +18min. This fact is interesting as the connection time between two domestic flights is usually around 40 to 90 min. So, depending on the airport size (time between terminals/gates) the arrival delay could be acceptable in most cases.
+
+The next step in this section is to see how the delays vary over time, i.e. delay per year, month, and day of the week.
+
+```{r echo=FALSE, Univariate_Plots3, message=FALSE, warning=FALSE}
+year_groups <- group_by(airlines,Year)
+
+airlines.by_year <- summarise(year_groups,
+                              mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+                              mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+                              median_dep_delay = median(DepDelay, na.rm = TRUE),
+                              median_arr_delay = median(ArrDelay, na.rm = TRUE),
+                              n=n())
+airlines.by_year <- arrange(airlines.by_year,Year)
+
+ggplot(aes(x=Year,y=value, colour=variable), data = airlines.by_year) + 
+  geom_line(aes(y=mean_dep_delay, col="mean_dep_delay"))+
+  geom_line(aes(y=mean_arr_delay, col="mean_arr_delay"))+
+  scale_x_continuous(breaks=seq(min(airlines$Year),max(airlines$Year),2))+
+  ggtitle("Mean Departure and Arrival Delay per Year")
+
+ggplot(aes(x=Year,y=value, colour=variable), data = airlines.by_year) + 
+  geom_line(aes(y=median_dep_delay, col="median_dep_delay"))+
+  geom_line(aes(y=median_arr_delay, col="median_arr_delay"))+
+  scale_x_continuous(breaks=seq(min(airlines$Year),max(airlines$Year),2))+
+  ggtitle("Median Departure and Arrival Delay per Year")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_month <- airlines %>%
+  group_by(Month) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(Month)
+
+ggplot(aes(x=Month,y=value, colour=variable), data = airlines.by_month) + 
+  geom_line(aes(y=mean_dep_delay, col="mean_dep_delay"))+
+  geom_line(aes(y=mean_arr_delay, col="mean_arr_delay"))+
+  scale_x_continuous(breaks=seq(1,12,1))+
+  ggtitle("Mean Departure and Arrival Delay per Month")
+
+
+ggplot(aes(x=Month,y=value, colour=variable), data = airlines.by_month) + 
+  geom_line(aes(y=median_dep_delay, col="median_dep_delay"))+
+  geom_line(aes(y=median_arr_delay, col="median_arr_delay"))+
+  scale_x_continuous(breaks=seq(1,12,1))+
+  ggtitle("Median Departure and Arrival Delay per Month")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_weekday <- airlines %>%
+  group_by(DayOfWeek) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  arrange(DayOfWeek)
+
+ggplot(aes(x=DayOfWeek,y=value, colour=variable), data = airlines.by_weekday) + 
+  geom_line(aes(y=mean_dep_delay, col="mean_dep_delay"))+
+  geom_line(aes(y=mean_arr_delay, col="mean_arr_delay"))+
+  scale_x_continuous(breaks=seq(1,7,1))+
+  ggtitle("Mean Departure and Arrival Delay per Week Day")
+
+
+ggplot(aes(x=DayOfWeek,y=value, colour=variable), data = airlines.by_weekday) + 
+  geom_line(aes(y=median_dep_delay, col="median_dep_delay"))+
+  geom_line(aes(y=median_arr_delay, col="median_arr_delay"))+
+  scale_x_continuous(breaks=seq(1,7,1))+
+  ggtitle("Median Departure and Arrival Delay per Week Day")
+```
+
+The drop after 2001 suggests a link to the 9/11 attacks. Therefore, in the following plots, only flights from 2001 (the entire year) and September 2001 (month only) are shown.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(x=Date), 
+       data=subset(airlines, Year==2001))+
+  geom_line(aes(y=DepDelay, colour="DepDelay"), stat="summary", fun.y=mean)+
+  geom_line(aes(y=ArrDelay, colour="ArrDelay"), stat="summary", fun.y=mean)+
+  scale_x_datetime(date_labels = "%b", date_breaks = "1 month")+
+  ggtitle("Mean Departure and Arrival Delay in 2001")
+
+ggplot(aes(x=Date), 
+       data=subset(airlines, Year==2001))+
+  geom_line(aes(y=DepDelay, colour="DepDelay"), stat="summary", fun.y=mean)+
+  geom_point(aes(y=DepDelay, colour="DepDelay"), stat="summary", fun.y=mean)+
+  geom_line(aes(y=ArrDelay, colour="ArrDelay"), stat="summary", fun.y=mean)+
+  geom_point(aes(y=ArrDelay, colour="ArrDelay"), stat="summary", fun.y=mean)+
+  scale_x_datetime(date_labels = "%d", date_breaks = "1 day", 
+                   limits = c(ISOdate(2001,9,1),ISOdate(2001,9,30)))+
+  ggtitle("Mean Departure Delay in September 2001")
+
+```
+
+Interestingly, on September 11, 2001 the mean arrival delay is negative. Following the 9/11 attacks, the FAA first stopped all civilian aircraft from taking off and then ordered all civilian aircraft to land.
+
+The air space was then reopened on September 14. Both mean arrival and departure delay are very high that day, most probably due to the fact that aircraft needed to be repositioned after being diverted and/or grounded.
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+The strongest relationship that was found is between departure and arrival delay. It seems that a departure delay is almost always carried over and cannot be recovered. The analysis also showed that, especially for shorter flights, there must be other factors impacting the delays.
+
+Longer flights tend to have less deviation from their scheduled flight time that short haul flights.
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+Some airlines seem to be more on-time than others. Most airlines have a similar medium and median departure and arrival delay, but some airlines (e.g. AQ = Aloha Airlines or HA = Hawaiian Airlines) have an average delay close to zero. The question is why this is the case: Are these airlines flying from and into less frequented airports? Are they operating in areas of the US that are not so much impacted by weather?
+
+What is interesting is that the busiest airports/airlines do not have the largest delays. There is no correlation between number of flights and delays for neither airports nor airlines. Maybe it is a combination of both.
+
+### What was the strongest relationship you found?
+
+There seems to be a linear correlation between departure and arrival delay, especially at large delays. At shorter delays, there is more scatter and the relationship is not clearly linear anymore. 
+
+This could indicate that an arrival delay is likely to be caused by the late departure but not exclusively.
+
+# Multivariate Plots Section
+
+The previous section showed a strong linear correlation between arrival and departure delay. Now, the same plot is produced including coloring by airline.
+
+```{r echo=FALSE, Multivariate_Plots1, message=FALSE, warning=FALSE}
+ggplot(aes(x=DepDelay, y=ArrDelay, color=UniqueCarrier), data=airlines) +
+  scale_colour_hue(l=60)+
+  geom_point(alpha = 1/2)+
+  ggtitle("Arrival Delay vs. Departure Delay by Carrier")+
+  xlab("Departure Delay / min")+
+  ylab("Arrival Delay / min")
+```
+
+Again the same plot but zoomed in on smaller delays.
+
+```{r echo=FALSE, Multivariate_Plotsx, message=FALSE, warning=FALSE}
+ggplot(aes(x=DepDelay, y=ArrDelay, color=UniqueCarrier), data=airlines) +
+  scale_colour_hue(l=45)+
+  geom_point(alpha = 1/5)+
+  scale_x_continuous(limits = c(-50,450),breaks=seq(-50,450,50))+
+  scale_y_continuous(limits = c(-50,450),breaks=seq(-50,450,50))+
+  ggtitle("Arrival Delay vs. Departure Delay by Carrier (Zoom)")+
+  xlab("Departure Delay / min")+
+  ylab("Arrival Delay / min")
+```
+
+There is no clear trend by airline; it seems that most airlines do suffer larger delays at some point.
+
+The previous section showed a trend over time. Now the variation over the years and months are combined in a heat map, where year are along the x-axis and months are along the y-axis. The color indicates the average delay for that year/month.
+
+To complement this illustration, the number of flights are also plotted in the same way.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.by_year_month <- airlines %>%
+  group_by(Year, Month) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(Year, Month)
+
+ggplot(aes(x=Year, y=Month, fill=mean_dep_delay), data=airlines.by_year_month) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))+
+  scale_x_continuous(breaks=seq(1987,2008,2))+
+  scale_y_continuous(breaks=seq(1,12,1))+
+  ggtitle("Mean Departure Delay by Month and Year")
+
+ggplot(aes(x=Year, y=Month, fill=mean_arr_delay), data=airlines.by_year_month) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(100))+
+  scale_x_continuous(breaks=seq(1987,2008,2))+
+  scale_y_continuous(breaks=seq(1,12,1))+
+  ggtitle("Mean Arrival Delay by Month and Year")
+
+ggplot(aes(x=Year, y=Month, fill=n), data=airlines.by_year_month) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("#eaebed", "#202021"))(1000))+
+  scale_x_continuous(breaks=seq(1987,2008,2))+
+  scale_y_continuous(breaks=seq(1,12,1))+
+  ggtitle("Number of flights by Month and Year")
+```
+
+The previous section showed that there is no correlation between number of flights and delays. Now, it is checked whether there is a correlation between:
+
+  * Airport and Airline
+  * Origin and Destination
+  
+To check the first point, the dataset is sorted by airline and airport and two heatmaps (departure and arrival delay) are created with the mean delay for each airport/airline pair.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Sort by origin and airline
+airlines.by_carrier_origin <- airlines %>%
+  group_by(UniqueCarrier, Origin) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(UniqueCarrier, Origin)
+
+ggplot(aes(x=UniqueCarrier, y=Origin, fill=mean_dep_delay), data=airlines.by_carrier_origin) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+
+# Sort by destination and airline
+airlines.by_carrier_dest <- airlines %>%
+  group_by(UniqueCarrier, Dest) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(Dest, UniqueCarrier)
+
+ggplot(aes(x=UniqueCarrier, y=Dest, fill=mean_arr_delay), data=airlines.by_carrier_dest) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+```
+
+Unfortunately, this does not allow a clear view of whether the airport/airline combination has an effect on delay. It can be seen that some airlines have larger delays at certain airports but there is no systematic view. The high number of blank fields is due to the fact that an airline does not serve all airports in the dataset.
+
+Therefore, a subset is created for airport/airline pairs with more than 250 flights.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# only airport/airline pairs with more than 250 flights
+airlines.by_carrier_origin_small <- subset(airlines.by_carrier_origin, n>250)
+
+ggplot(aes(x=UniqueCarrier, y=Origin, fill=mean_dep_delay), data=airlines.by_carrier_origin_small) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+
+# only airport/airline pairs with more than 250 flights
+airlines.by_carrier_dest_small <- subset(airlines.by_carrier_dest, n>250)
+ggplot(aes(x=UniqueCarrier, y=Dest, fill=mean_arr_delay), data=airlines.by_carrier_dest_small) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+
+```
+
+
+A similar plot is produced for the routes, i.e. a heatmap between origin and destination.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Sort by destination and origin
+airlines.by_origin_dest <- airlines %>%
+  group_by(Origin, Dest) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(Origin, Dest)
+
+# Plot mean departure delay
+ggplot(aes(x=Origin, y=Dest, fill=mean_dep_delay), data=airlines.by_origin_dest) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+
+# Plot mean arrival delay
+ggplot(aes(x=Origin, y=Dest, fill=mean_arr_delay), data=airlines.by_origin_dest) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+```
+
+Unfortunately, due to the high number of airports (317), this plot does not reveal much. It cannot be concluded whether a certain route is subject to higher delays than others.
+
+So again, a subset is created with pairs that have more than 125 flights.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Sort by destination and origin
+airlines.by_origin_dest_small <- subset(airlines.by_origin_dest, n > 125)
+
+# Plot mean departure delay
+ggplot(aes(x=Origin, y=Dest, fill=mean_dep_delay), data=airlines.by_origin_dest_small) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+
+# Plot mean arrival delay
+ggplot(aes(x=Origin, y=Dest, fill=mean_arr_delay), data=airlines.by_origin_dest_small) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))
+```
+
+Previously it was shown that flights out of Newark (EWR) have the highest mean delay. Here in the heat map, EWR pops up again.
+
+So, a map is plotted with all destinations served out of Newark colored by the average departure delay.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.EWR_origin <- subset(airlines,Origin=="EWR") %>%
+  group_by(Dest) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            OriginLon = mean(OriginLon, na.rm = TRUE),
+            OriginLat = mean(OriginLat, na.rm = TRUE),
+            DestLon = mean(DestLon, na.rm = TRUE),
+            DestLat = mean(DestLat, na.rm = TRUE),
+            n=n()) %>%
+  arrange(mean_dep_delay)
+
+
+usa <- map_data("usa") 
+ggplot() + geom_polygon(data = usa, aes(x=long, y = lat, group = group)) + 
+  coord_fixed(1.3)+
+  geom_point(data=airlines.EWR_origin, aes(x=OriginLon, y=OriginLat), color="#4286f4", size=5)+
+  geom_point(data=airlines.EWR_origin, aes(x=DestLon, y=DestLat, col=mean_dep_delay), size=2)+
+  scale_color_continuous(low="green", high="red")+
+  ggtitle("Mean departure delay for flights out of EWR")+
+  annotate("text",x=airlines.EWR_origin$OriginLon, y=airlines.EWR_origin$OriginLat, 
+           label="EWR", colour="darkred")
+```
+
+Looking at the Top5 airports (sorted by mean departure delay in descending order) shows that the maximum delay is for flights to San Antonio International (SAT) followed by William P Hobby Airport, Houston (HOU) and Metropolitan Oakland International Airport  (OAK):
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+head(arrange(airlines.EWR_origin,desc(mean_dep_delay)),5)
+```
+
+All three airports are only served twice from EWR and in each case only one flight was heavily delayed.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+routeEWRSAT <- (airlines$Route == "EWR-SAT" | 
+                  airlines$Route == "EWR-HOU" | airlines$Route == "EWR-OAK")
+airlines[routeEWRSAT, c("Origin", "Dest", "DepDelay", "UniqueCarrier")]
+```
+
+The question is therefore whether this sample is really representative of all flights from Newark to these destinations (keep in mind that this is a reduced dataset). Incidentally, all flights in question were performed by Continental Air Lines (CO).
+
+Looking at destinations out of Newark with more than 20 flights shows that Kansas City (MCI) and Raleigh-Durham International (RDU) have average delays of 36.9 min and 36.4 min respectively. The plot of delay vs. number of flights is also created.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+airlines.EWR_origin_small <- subset(airlines.EWR_origin, n>20)
+
+head(arrange(airlines.EWR_origin_small,desc(mean_dep_delay)),5)
+
+
+ggplot(aes(x=n, y=mean_dep_delay), data=airlines.EWR_origin)+
+  geom_point()
+
+```
+
+Similarly to before, no correlation between number of flights and delay is to be noted. The largest delays occur at low number of flights but this may be due to the fact that the low sample number is not representative of the entire population for that route.
+
+The next two heat maps show the average delay and number of flights out of EWR for each airline/destination pair.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Sort flights out of EWR by destination and airline
+airlines.EWR_origin_airline <- subset(airlines,Origin=="EWR") %>%
+  group_by(Dest, UniqueCarrier) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            OriginLon = mean(OriginLon, na.rm = TRUE),
+            OriginLat = mean(OriginLat, na.rm = TRUE),
+            DestLon = mean(DestLon, na.rm = TRUE),
+            DestLat = mean(DestLat, na.rm = TRUE),
+            n=n()) %>%
+  ungroup() %>%
+  arrange(desc(mean_dep_delay))
+
+# Plot mean departure delay for each carrier/destination pair
+ggplot(aes(x=Dest, y=UniqueCarrier, fill=mean_dep_delay), data=airlines.EWR_origin_airline) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))+
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1, size=6))
+
+# Plot number of flights for each carrier/destination pair
+ggplot(aes(x=Dest, y=UniqueCarrier, fill=n), data=airlines.EWR_origin_airline) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("lightgreen", "red"))(10))+
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1, size=6))
+
+```
+
+It can be seen that Continental (CO) serves most destinations out of Newark along with Expressjet Airlines (XE). The number of Continental flights are higher than the Expressjet flights. In terms of delay, Continental has a better performance out of Newark than Expressjet. This could be linked once again to the low number of flights and that this may not be representative.
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+With the available data it is difficult to pinpoint the exact reason for a delay. It can be shown that the delay is independent of number of flights at a given location or a given airline. It can be shown that if there is knowledge about external data (here the 9/11 attacks) delays can be explained.
+
+### Were there any interesting or surprising interactions between features?
+
+The heat map of departure and arrival delay by month and year showed two interesting things. Firstly, it confirms that there is a seasonal variation of delay: higher delays around Christmas (December, January) and during summer holidays (June till August). Secondly, the heat map shows a drop after 1991 (unknown reason) and after 2001 (due to the 9/11 attacks).
+
+Interestingly, the heat map shows that the minimum delay (both departure and arrival) occured in September 2002. The plot with the number of flights indicate that one year after 9/11 the number of flights dropped; there is a gap between August and October 2002.
+
+Lastly, an interesting feature revealed by the heat map is that the number of flights after 2002 continue to increase as they did before. The 9/11 attacks had an impact on 2002, but the following years follow the pre-2001 trend.
+
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One, message=FALSE, warning=FALSE}
+colorCount = length(unique(airlines$UniqueCarrier))
+getPalette = colorRampPalette(brewer.pal(9, "Paired"))
+
+
+ggplot(aes(x=DepDelay, y=ArrDelay), data=airlines) +
+  geom_point(aes(fill=I('#4286f4'), color=I('black')),alpha=.3, shape=21)+
+  scale_x_continuous(limits=c(-125,1125), breaks=seq(-125,1125,125))+
+  ggtitle("Arrival Delay vs. Departure Delay")+
+  xlab("Departure Delay in min")+
+  ylab("Arrival Delay in min")
+```
+
+### Description One
+The interesting thing about this plot is that departure and arrival delay show a strong linear correlation (correlation coefficient is 0.905). This means that once an aircraft takes off with a delay, the delay cannot be recovered in most cases, especially for larger departure delays. For shorter departure delays, the scatter increases, which means that other factors contribute to the arrival delay.
+
+### Plot Two
+```{r echo=FALSE, Plot_Two, message=FALSE, warning=FALSE}
+getPalette = colorRampPalette(brewer.pal(9, "YlOrRd"))
+
+ggplot(aes(x=Year, y=Month, fill=mean_arr_delay), data=airlines.by_year_month) +
+  geom_tile() +
+  scale_fill_gradientn(colours = getPalette(100), name="Mean Delay in min")+
+  scale_x_continuous(breaks=seq(1987,2008,1))+
+  scale_y_continuous(breaks=seq(1,12,1))+
+  labs(title="Mean Arrival Delay by Month and Year")+
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Description Two
+This plot is interesting as it shows the delay evolution over the years and throughout each year. It is possible to identify peak months such as December/January or summer holiday periods as well as the trend of increasing delays over the year. Lastly, drops like the one following the 9/11 attacks which do not follow the general trend over the years can be identified.
+
+### Plot Three
+```{r echo=FALSE, Plot_Three, message=FALSE, warning=FALSE}
+airlines.ORD_origin <- subset(airlines,Origin=="ORD") %>%
+  group_by(Dest) %>%
+  summarise(mean_dep_delay = mean(DepDelay, na.rm = TRUE),
+            mean_arr_delay = mean(ArrDelay, na.rm = TRUE),
+            median_dep_delay = median(DepDelay, na.rm = TRUE),
+            median_arr_delay = median(ArrDelay, na.rm = TRUE),
+            OriginLon = mean(OriginLon, na.rm = TRUE),
+            OriginLat = mean(OriginLat, na.rm = TRUE),
+            DestLon = mean(DestLon, na.rm = TRUE),
+            DestLat = mean(DestLat, na.rm = TRUE),
+            n=n()) %>%
+  arrange(mean_dep_delay)
+
+state_map <- map_data("state")
+
+ggplot()+
+  geom_polygon(data = state_map, aes(x=long, y = lat, group = group), 
+               colour = "#424240", fill="#565a5b")+
+  coord_fixed(1.3)+
+  geom_point(data=airlines.ORD_origin, aes(x=OriginLon, y=OriginLat), color="#4286f4", size=5)+
+  geom_point(data=airlines.ORD_origin, aes(x=DestLon, y=DestLat, col=mean_dep_delay), size=2)+
+  scale_color_continuous(low="green", high="red")+
+  #ggtitle("")+
+  annotate("text",x=airlines.ORD_origin$OriginLon, y=airlines.ORD_origin$OriginLat, 
+           label="ORD", colour="darkred")+
+  xlab("Longitude in deg")+
+  ylab("Latitude in deg")+ 
+  labs(title="Mean departure delay for flights out of Chicago O'Hare",
+       color="Mean Delay in min")
+```
+
+### Description Three
+This plot is interesting as it shows the mean departure delay out of Chicago O'Hare International Airport for each destination in the available dataset. Despite being the busiest airport (i.e. highest number of flights) most flights have reasonable delays (< 20 min). Some destinations have high delays of 40-60 min, but the number of flights for these airports are low and hence it is questionable whether this sample is representative.
+
+Another interesting thing to be mentioned here is that there is a gap from Montana/North Dakota down to the half of Texas where no airports are served from Chicago O'Hare.
+
+Please note that there are some destinations outside of the contiguous US map. These destinations are Honolulu (HNL), Kahului (OGG), Anchorage (ANC), Cyril E. King Airport on Saint Thomas (STT), and San Juan in Puerto Rico (SJU).
+
+------
+
+# Reflection
+
+The dataset was supposed to be a cleaned dataset. However, when looking at the data it became obvious that some data wrangling was necessary (see the above section). The cleaning was done for departure delay, arrival delay and elapsed time for flights that stood out. A more thorough data wrangling of all parameters was not possible due to limited time. Also, an automized cleaning of the parameters based on scheduled departure and arrival times would be better instead of the manual cleaning that was done here.
+
+The dataset contains the variables `CarrierDelay`, `WeatherDelay`, `NASDelay` (NAS=National Air Space), `SecurityDelay`, and `LateAircraftDelay`. Only 34,244 flights out of 123,496 flights in the dataset contain values for these parameters. It would nonetheless be interesting to detail the delays for these flights to analyze the cause in more detail.
+
+Also, it could be interesting to pick a few airports/airlines/routes with large/small delays and to see if there are factors that can be identified to be responsible for the delays. Especially including weather data would interesting; what are prevailing wind/precipitation etc.? In the analysis it was shown how the 9/11 attacks impacted delays in the US. It could also be interesting to add information about catastrophes (e.g. hurricane Katrina) or also strikes if relevant to air traffic (pilots, ATC, ground workers etc.).
+
+The data used for this project is only a subset of the full dataset that is available (see link above). The full dataset contains almost 120 million flights for the same time frame from 1987 till 2008. It would therefore be interesting to see how representative this subset was or if the results are skewed due to the selection of the flights.

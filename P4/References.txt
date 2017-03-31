@@ -1,0 +1,4 @@
+http://www.iata.org/services/Pages/codes.aspx
+http://zevross.com/blog/2014/07/16/mapping-in-r-using-the-ggplot2-package/
+http://stat-computing.org/dataexpo/2009/
+http://openflights.org/data.html

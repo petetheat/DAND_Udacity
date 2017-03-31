@@ -1,0 +1,46 @@
+	Name				Description
+1  	Year  				1987-2008 
+2  	Month  				1-12 
+3  	DayofMonth  		1-31 
+4  	DayOfWeek  			1 (Monday) - 7 (Sunday) 
+5  	DepTime  			actual departure time (local, hhmm) 
+6  	CRSDepTime  		scheduled departure time (local, hhmm) 
+7  	ArrTime  			actual arrival time (local, hhmm) 
+8  	CRSArrTime  		scheduled arrival time (local, hhmm) 
+9  	UniqueCarrier  		unique carrier code 
+10  FlightNum  			flight number 
+11  TailNum  			plane tail number 
+12  ActualElapsedTime  	in minutes 
+13  CRSElapsedTime  	in minutes 
+14  AirTime  			in minutes 
+15  ArrDelay  			arrival delay, in minutes 
+16  DepDelay  			departure delay, in minutes 
+17  Origin  			origin IATA airport code 
+18  Dest  				destination IATA airport code 
+19  Distance  			in miles 
+20  TaxiIn  			taxi in time, in minutes 
+21  TaxiOut  			taxi out time in minutes 
+22  Cancelled  			was the flight cancelled? 
+23  CancellationCode  	reason for cancellation (A = carrier, B = weather, C = NAS, D = security) 
+24  Diverted  			1 = yes, 0 = no 
+25  CarrierDelay  		in minutes 
+26  WeatherDelay  		in minutes 
+27  NASDelay  			in minutes 
+28  SecurityDelay  		in minutes 
+29  LateAircraftDelay  	in minutes 
+
+
+
+	Name		Description
+1	AirportID 	Unique OpenFlights identifier for this airport.  
+2	Name 		Name of airport. May or may not contain the City name. 
+3	City 		Main city served by airport. May be spelled differently from Name. 
+4	Country 	Country or territory where airport is located.
+5	IATA 		3-letter IATA code. Null if not assigned/unknown. 
+6	ICAO 		4-letter ICAO code. Null if not assigned. 
+7	Lat 		Decimal degrees, usually to six significant digits. Negative is South, positive is North. 
+8	Lon 		Decimal degrees, usually to six significant digits. Negative is West, positive is East. 
+9	Altitude 	Altitude in feet. 
+10	Timezone 	Hours offset from UTC. Fractional hours are expressed as decimals, eg. India is 5.5. 
+11	DST 		Daylight savings time. One of E (Europe), A (US/Canada), S (South America), O (Australia), Z (New Zealand), N (None) or U (Unknown).
+12	Tzdatabase 	Timezone in "tz" (Olson) format, eg. "America/Los_Angeles".  
