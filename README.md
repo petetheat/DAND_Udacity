@@ -1,3 +1,4 @@
 # My Udacity Data Analysis Nanodegree
 
-Project files
+My repository for my Udacity data analysis nanodegree
+
