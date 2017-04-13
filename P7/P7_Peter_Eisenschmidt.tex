@@ -56,6 +56,8 @@
 \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
 \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
+\usepackage{hyperref}
+
 %%% END Article customizations
 
 %%% The "real" document content comes below...
@@ -64,6 +66,8 @@
 \author{Peter Eisenschmidt}
 %\date{} % Activate to display a given date or no date (if empty),
          % otherwise the current date is printed 
+
+
 
 \begin{document}
 \maketitle
@@ -123,14 +127,108 @@ This results in the following standard deviations:
 \item Net Conversion: $\sigma =  .0156$
 \end{itemize}
 
+For both gross and net conversion, the unit of analysis and the unit of diversion are the same (cookies), whereas the unit of analysis for retention is User ID. Therefore, the analytic estimate of the standard deviation is likely to be comparable to the empirical standard deviation for gross and net conversion but not for retention. For the latter it might be interesting to do an empirical estimate.
 
 \subsection{Sizing}
-Number of Samples vs. Power\medskip
+\subsubsection{Number of Samples vs. Power}
 
-\noindent Duration vs. Exposure
+In order to determine the number of samples, this calculator \url{http://www.evanmiller.org/ab-testing/sample-size.html} is used. For all three metrics, $1-\beta$ is 80\% and $\alpha$ is 5\%, i.e. no Bonferroni correction is applied. 
+
+The baseline conversion rate and the minimum detectable effect $d_{min}$ is listed below for each metric as well as resulting number of samples.
+
+\begin{itemize}
+\item Gross conversion:
+	\begin{itemize}
+		\item Baseline conversion: 20.625\%
+		\item Minimum detectable effect: 1\%
+		\item Samples = 25,835
+	\end{itemize}
+\item Retention:
+	\begin{itemize}
+		\item Baseline conversion: 53\%
+		\item Minimum detectable effect: 1\%
+		\item Samples = 39,115
+	\end{itemize}
+\item Net conversion:
+	\begin{itemize}
+		\item Baseline conversion: 10.93125\%
+		\item Minimum detectable effect: .75\%
+		\item Samples = 27,413
+	\end{itemize}
+\end{itemize}
+The number of pageviews can then be calculated as follows for gross and net conversion:
+\begin{equation}
+	N_{PV} = 2 \times n_{Samples} \times \frac{Cookies_{ViewPagePerDay}}{Cookies_{ClickFreeTrial}}
+\end{equation}
+For retention it is given by
+\begin{equation}
+	N_{PV} = 2 \times n_{Samples} \times \frac{Cookies_{ViewPagePerDay}}{Enrollments}
+\end{equation}
+The resulting page views are:
+\begin{labeling}{Gross conversion}
+\item[Gross Conversion] 645,875
+\item[Retention]  4,741,212
+\item[Net Conversion]  685,325
+\end{labeling}
+Therefore, a total number of 4,741,212 page views is required if all metrics are to be used.
+
+\subsubsection{Duration vs. Exposure}
+
+The change tested in this experiment is a low risk for the participants (no collection of sensitive data, no exposure to physical harm as the change consists of asking the student how much time per week they were willing to invest in the course). Therefore, it can be assumed to be safe to divert 100\% of the traffic to this experiment. With 40,000 page views per day, this results in the following durations:
+
+\begin{itemize}
+\item Duration (Gross conversion): 17 days
+\item Duration (Retention):        119 days
+\item Duration (Net conversion):   18 days
+\end{itemize}
+119 days is not feasible for this experiment, therefore retention is not retained as a metric. The resulting experiment duration is then 18 days.
 
 \section{Experiment Analysis}
 \subsection{Sanity Checks}
+
+For \textbf{cookies}, there is a 50\% probability of being either in the control or in the experiment group. In the experiment and control group there were 344,660 and 345,543 page views respectively. The standard deviation is therefore:
+\begin{equation}
+	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = 0.00060
+\end{equation}
+The margin of error (for a 95\% confidence interval, i.e. z = 1.96) is then:
+\begin{equation}
+	m = \sigma \times z = 0.00118
+\end{equation}
+Consquently, the upper and lower bound for cookies are 0.49882 and 0.50118 respectively.\medskip
+
+The observed value is 
+\begin{equation}
+	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = 0.50064
+\end{equation}
+which is in between the lower and upper bound.\medskip
+
+For the \textbf{number of clicks}, the probability is also 50\%. The number of clicks in the experiment and the control group are 28325 and 28378 respectively. The resulting standard deviation is therefore:
+\begin{equation}
+	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = 0.00210
+\end{equation}
+The margin of error is then:
+\begin{equation}
+	m = \sigma \times z = 0.00412
+\end{equation}
+Consquently, the upper and lower bound for number of clicks are 0.49588  and 0.50412 respectively.\medskip
+
+The observed value is 
+\begin{equation}
+	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = 0.50047
+\end{equation}
+which also falls within the boundaries of the confidence interval.\medskip
+
+Lastly, the observed \textbf{Click-through-probability} of experiment and control group are 0.08219 and 0.08213 respectively. The standard deviation for the control group is
+\begin{equation}
+	\sigma = \sqrt{\frac{CTP_{cont}\times (1-CTP_{cont})}{N_{cont}}} = 0.00047
+\end{equation}
+and the margin of error:
+\begin{equation}
+	m = \sigma \times z = 0.00092
+\end{equation}
+which results in lower and upper bounds of 0.08121 and 0.08304. The CTP of the experiment group is within this confidence intervall.\medskip
+
+It can therefore be concluded that all invariant metrics pass the sanity checks.
 
 \subsection{Result Analysis}
 
