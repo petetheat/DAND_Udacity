@@ -165,7 +165,7 @@ For retention it is given by
 	N_{PV} = 2 \times n_{Samples} \times \frac{Cookies_{ViewPagePerDay}}{Enrollments}
 \end{equation}
 The resulting page views are:
-\begin{labeling}{Gross conversion}
+\begin{labeling}{Gross Conversion}
 \item[Gross Conversion] 645,875
 \item[Retention]  4,741,212
 \item[Net Conversion]  685,325
@@ -188,7 +188,7 @@ The change tested in this experiment is a low risk for the participants (no coll
 
 For \textbf{cookies}, there is a 50\% probability of being either in the control or in the experiment group. In the experiment and control group there were 344,660 and 345,543 page views respectively. The standard deviation is therefore:
 \begin{equation}
-	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = 0.00060
+	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = .00060
 \end{equation}
 The margin of error (for a 95\% confidence interval, i.e. z = 1.96) is then:
 \begin{equation}
@@ -198,42 +198,135 @@ Consquently, the upper and lower bound for cookies are 0.49882 and 0.50118 respe
 
 The observed value is 
 \begin{equation}
-	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = 0.50064
+	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = .50064
 \end{equation}
 which is in between the lower and upper bound.\medskip
 
 For the \textbf{number of clicks}, the probability is also 50\%. The number of clicks in the experiment and the control group are 28325 and 28378 respectively. The resulting standard deviation is therefore:
 \begin{equation}
-	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = 0.00210
+	\sigma = \sqrt{\frac{2p}{N_{exp} + N_{cont}}} = .00210
 \end{equation}
 The margin of error is then:
 \begin{equation}
 	m = \sigma \times z = 0.00412
 \end{equation}
-Consquently, the upper and lower bound for number of clicks are 0.49588  and 0.50412 respectively.\medskip
+Consquently, the upper and lower bound for number of clicks are .49588  and .50412 respectively.\medskip
 
 The observed value is 
 \begin{equation}
-	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = 0.50047
+	p = \frac{N_{cont}}{N_{exp}+N_{cont}} = .50047
 \end{equation}
 which also falls within the boundaries of the confidence interval.\medskip
 
-Lastly, the observed \textbf{Click-through-probability} of experiment and control group are 0.08219 and 0.08213 respectively. The standard deviation for the control group is
+Lastly, the observed \textbf{Click-through-probability} of experiment and control group are .08219 and .08213 respectively. The standard deviation for the control group is
 \begin{equation}
-	\sigma = \sqrt{\frac{CTP_{cont}\times (1-CTP_{cont})}{N_{cont}}} = 0.00047
+	\sigma = \sqrt{\frac{CTP_{cont}\times (1-CTP_{cont})}{N_{cont}}} = .00047
 \end{equation}
 and the margin of error:
 \begin{equation}
-	m = \sigma \times z = 0.00092
+	m = \sigma \times z = .00092
 \end{equation}
-which results in lower and upper bounds of 0.08121 and 0.08304. The CTP of the experiment group is within this confidence intervall.\medskip
+which results in lower and upper bounds of .08121 and .08304. The CTP of the experiment group is within this confidence intervall.\medskip
 
 It can therefore be concluded that all invariant metrics pass the sanity checks.
 
 \subsection{Result Analysis}
 
+\subsubsection{Effect Size Test}
+
+The \textbf{Gross Conversion} of experiment and control group are:
+\begin{eqnarray}
+	GC_{exp} &=& \frac{X_{exp}}{N_{exp}} =  .19832\\
+	GC_{cont} &=& \frac{X_{cont}}{N_{cont}}= .21887
+\end{eqnarray}
+where $X_{exp}$ and $X_{cont}$ are the number of enrollments in both groups. Please note that only rows are used where Enrollments are not null. This results in $N_{exp}=17,260$ and $N_{cont}=17,293$. \medskip
+
+The observed difference is therefore:
+\begin{equation}
+	\hat{d} = GC_{exp} - GC_{cont} = -.02055
+\end{equation}
+The pooled probability is hence:
+\begin{equation}
+	\hat{p}_{pool} = \frac{X_{exp}+ X_{cont}}{N_{exp} + N_{cont}} = .20861
+\end{equation}
+The pooled standard error is then given by:
+\begin{equation}
+	SE_{pool} = \sqrt{\hat{p}_{pool}\times \left(1-\hat{p}_{pool}\right) \times \left(\frac{1}{N_{exp}} + \frac{1}{N_{cont}}\right)} = .00437
+\end{equation}
+which in turn gives a margin of error (with $z=1.96$ for a 95\% confidence interval):
+\begin{equation}
+	m = z \times SE_{pool} = .00857
+\end{equation}
+The confidence interval for \textbf{Gross Conversion} is therefore:
+\begin{equation}
+	CI = \left(-0.02912, -0.01199\right)
+\end{equation}
+This means that gross conversion is both statistically and practically significant (recall that the practical significance boundary is .01).\medskip
+
+\includegraphics[width=\textwidth]{gross_conv}
+
+Similarly, the \textbf{Net Conversion} of experiment and control group are:
+\begin{eqnarray}
+	NC_{exp} &=& \frac{X_{exp}}{N_{exp}} =  .11269\\
+	NC_{cont} &=& \frac{X_{cont}}{N_{cont}}= .11756
+\end{eqnarray}
+where $X_{exp}$ and $X_{cont}$ are the number of payments in both groups. As before, only rows where payments are not null are used.
+
+The observed difference is then:
+\begin{equation}
+	\hat{d} = NC_{exp} - NC_{cont} = -.00487
+\end{equation}
+The pooled probability is hence:
+\begin{equation}
+	\hat{p}_{pool} = \frac{X_{exp}+ X_{cont}}{N_{exp} + N_{cont}} = .11513
+\end{equation}
+The pooled standard error is then given by:
+\begin{equation}
+	SE_{pool} = \sqrt{\hat{p}_{pool}\times \left(1-\hat{p}_{pool}\right) \times \left(\frac{1}{N_{exp}} + \frac{1}{N_{cont}}\right)} = .00343
+\end{equation}
+which in turn gives a margin of error (with $z=1.96$ for a 95\% confidence interval):
+\begin{equation}
+	m = z \times SE_{pool} = .00673
+\end{equation}
+The confidence interval for \textbf{Net Conversion} is therefore:
+\begin{equation}
+	CI = \left(-0.01160, 0.00186\right)
+\end{equation}
+As zero is contained within the net conversion confidence intervall, the results are neither statistically or practically significant.
+
+\includegraphics[width=\textwidth]{net_conv}
+
+\subsubsection{Sign Test}
+
+In order to perform the sign test, the number of days with a positive change, i.e. the gross and net conversion of the experiment group is greater than those of the control group, are counted. The results are
+\begin{labeling}{Gross Conversion}
+\item[Gross Conversion] Number of successes: 4, total number days: 23
+\item[Net Conversion] Number of successes: 10, total number days: 23
+\end{labeling}
+
+Using \url{http://graphpad.com/quickcalcs/binomial1.cfm}, this gives the following two-tail P values:
+\begin{eqnarray}
+	p_{GC} &=& .0026 < \alpha = .05\\
+      p_{NC} &=& .6776 > \alpha = .05
+\end{eqnarray}
+This indicates that gross conversion is statistically significant whereas net conversion is not.
+
+\subsubsection{Summary}
+
+Bonferroni correction was not used, as only two metrics are used. So, if gross and net conversion were completely independent, the probability of a false positive would be 9.75\%. However, both metrics are correlated (students that make a payment need to enrol first), so 9.75\% is too high. Therefore, applying a Bonferroni correction would be too conservative.
+
+The effect size tests yields that gross conversion is statistically and practically significant. Net conversion is neither. The statistical significance of gross conversion is confirmed by the sign test. It also shows that net conversion is not statistically significant.
+
 \subsection{Recommendation}
 
+The experiment shows that the number of students to enroll in the 14-day trial are effectively reduced, which was one of the goals. However, at the same time the number of students to continue past the free trial and make at least one payment should not be reduced. This could not be shown in the experiment as the practical significance boundary for net conversion ($d_{min} = .0075$) falls within the confidence interval. So, there is a risk that the proposed change also negatively affects the number of students to make a payment. Therefore, the recommendation is not to launch the change.
+
 \section{Follow-Up Experiment}
+
+The initial experiment proved successful in terms of reducing the number of students to enrol in the free trial. However, it seems that it also reduces the number of students to continue past the 14-day trial. It is possible that there a students that initially indicate that they would spend more than 5 hours per week but for whatever reason do not invest the required amount of time. \medskip
+
+The follow-up experiment could consist in a check after the first week; if a student spends less than 5 hours, another screener is displayed to ask whether the student would like to schedule a one-to-one meeting with a coach. The idea is that this motivates the student to invest more time in the second week and subsequently continues past the free trial.\medskip
+
+As this concerns only students that have already enrolled in the free trial, the \textbf{Unit of Conversion} would be User ID. The metric for the follow-up experiment would be \textbf{Retention}, as the goal would be to see an increased number of students to make a payment.
 
 \end{document}
