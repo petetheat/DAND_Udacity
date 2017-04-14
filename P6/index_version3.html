@@ -78,7 +78,7 @@
 			
 			d3.select('body')
 			  .append('p')
-			  .text('The chart shows the Top5 standings including highlighted Bayern\'s standings for the years 1996 till 2016. The table below contains the points for the German Bundesliga (first division) and the corresponding position for all teams. Hover over the rows and lines to highlight and to get team information.');
+			  .text('The chart shows the Top5 teams for the years 1996 till 2016. The table below contains the points for the German Bundesliga (first division) and the corresponding position for all teams. Hover over the rows and lines to highlight and to get team information.');
 			
 			// Define the div for the tooltip
 			var div = d3.select("body")
@@ -96,9 +96,7 @@
 				height = 500 - margin,
 				table_height = 300 - margin;
 			
-			var logo_width = 16;
-			
-			var line_color = "rgb(132, 135, 132";
+			var logo_width = 15;
 			
 			// create SVG
 			var svg = d3.select("body")
@@ -125,15 +123,6 @@
 						  .attr("x", width - 110)
 						  .attr("y", height+2*margin - 120);
 			
-			// Add Bayern Logo
-	        var imgBayern = svg.selectAll("image_logo")
-	                           .data([0])		
-							   .enter()
-							   .append("svg:image")
-							   .attr("xlink:href", "logos/Bayern Munich.png")
-							   .attr("width", 80)	
-							   .attr("x", 2.2*margin)
-							   .attr("y", .2*margin);
 			
 			//////////////////////////////////////////////////
 			// Helper functions
@@ -156,10 +145,10 @@
 			function tableRowClicked(x) {
 				var SelectedRow = x.key;
 				d3.selectAll('.line')
-				  .style('stroke', line_color)
+				  .style('stroke', 'gray')
 				  .style('stroke-width', 1);
 				d3.selectAll('circle')
-				  .style('fill', line_color)  
+				  .style('fill', 'gray')  
 				  .attr("r", 3);
 				  
 				d3.selectAll('path#St' + x.key)
@@ -168,26 +157,6 @@
 				d3.selectAll('circle#St' + x.key)
 				  .style('fill', 'rgb(206, 4, 4)')  
 				  .attr("r", 5);
-			};
-			
-			function resetColor(x) {
-					
-				d3.selectAll('.line')
-				  .style('stroke', line_color)
-				  .style('stroke-width', 1);
-				  
-				d3.selectAll('circle')
-				  .style('fill', line_color)  
-				  .attr("r", 3);
-					  
-				d3.selectAll('.standing_rows')
-				  .style("background", "white")
-				  .style("color", "black");
-				  
-				for (var i=1; i< 6; i+=1) {
-					d3.select('tr#St' + i.toString())
-					  .style("background", line_color)
-				};  
 			};
 	
 			//////////////////////////////////////////////////
@@ -280,7 +249,7 @@
 			  .style("text-anchor", "middle")
 			  .style("font-size", "20px")
 			  .style("font-weight", "bold")
-			  .text("Top 5 Standings");
+			  .text("Top 5 Teams");
 			
 			// Source text
 			d3.select("svg")
@@ -355,11 +324,20 @@
 				  .append('path')
 				  .attr("class", "line")
 				  .style('stroke-width', 1)
-				  .style('stroke', line_color)
 				  .attr('id', 'St'+ d.key)
 				  .attr('d', line(d.values))
 				  .on("mouseover", function(a) {
-				    resetColor(a);
+				    d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				    
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+				  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 
 					d3.select(this)
 					  .style('stroke', 'rgb(206, 4, 4)')
@@ -376,8 +354,17 @@
 					  .style("color", "white");
 				  })
 				  .on("mouseout", function(a) {
-					resetColor(d);
-					div.style("opacity", 0);
+				    d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				  
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+					  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 				  });
 			
 				// add circles
@@ -386,7 +373,7 @@
 				  .data(d.values)
 				  .enter()
 				  .append('circle')
-				  .style('fill', line_color)
+				  .style('fill', 'gray')
 				  .attr("r", 3)
 				  .attr("cx", function (a) { 
 					var format = d3.time.format('%Y');
@@ -399,7 +386,17 @@
 					   .style("left", (d3.event.pageX) + "px")		
 					   .style("top", (d3.event.pageY - 28) + "px");	
 					   
-					resetColor(d);
+					d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				    
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+				  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 
 					var standing = this.id;
 					  
@@ -417,18 +414,26 @@
 					  .style("color", "white");   
 				  })					
 				  .on("mouseout", function(d) {		
-					resetColor(d);
 					div.style("opacity", 0);
+					
+					d3.selectAll('.line')
+					  .style('stroke', 'gray')
+				      .style('stroke-width', 1);
+				  
+					d3.selectAll('circle')
+					  .style('fill', 'gray')  
+				      .attr("r", 3);
+					  
+					d3.selectAll('.standing_rows')
+					  .style("background", "white")
+					  .style("color", "black");
 				  }); 
 				  
 			 }	  
 			});
 			
-			for (var i=1; i< 6; i+=1) {
-				d3.select('tr#St' + i.toString())
-				  .style("background", line_color)
-			};
-
+			// initialize counter to place team logos 
+			var posCounter = 1; 
 			
 			// add logos
 			nested.forEach(function(d,i) {
@@ -438,44 +443,20 @@
 				          .enter()
 						  .append("svg:image")
 						  .attr("xlink:href", function(a) {
-							if (a.teams === "Bayern Munich"){ 
-								return "logos/" + a.teams + ".png";
-							};
+							return "logos/" + a.teams + ".png";
 						  })
 						  .attr("height", logo_width)	
 						  .attr("x", function (a, i) { 
 							var format = d3.time.format('%Y');
-							return time_scale(format.parse(a['year']))-.5*logo_width; 
-							})
-						  .attr("y", function (a) { return point_scale(a['points'])-.5*logo_width; })
-						  .attr('id', 'St'+ d.key)
-						  .on("mouseover", function(d) {
-						  
-							div.style("opacity", .9);		
-							div.html(d.teams + "<br/>Points: "  + d.points + "<br/>Goal difference: "  + d.diff)	
-							   .style("left", (d3.event.pageX) + "px")		
-							   .style("top", (d3.event.pageY - 28) + "px");	
-					   
-							resetColor(d);
+							if (i == 20) 
+								{ posCounter+=1;};
 							
-							var standing = this.id;
-
-							d3.select('path#' + standing)
-							  .style('stroke', 'rgb(206, 4, 4)')
-							  .style('stroke-width', 2);
-					
-							d3.selectAll('circle#' + standing)
-							  .style('fill', 'rgb(206, 4, 4)')  
-							  .attr("r", 5);
-					  
-							d3.select('tr#' + standing)
-							  .style("background", "steelBlue")
-							  .style("color", "white");   
-							})					
-						  .on("mouseout", function(d) {		
-							resetColor(d);
-							div.style("opacity", 0);
-						  });
+							if (posCounter == 1 || posCounter == 3 || posCounter == 5) {
+								return time_scale(format.parse(a['year']))-1.1*logo_width; 
+							} else {
+								return time_scale(format.parse(a['year']))+.2*logo_width;
+							};})
+						  .attr("y", function (a) { return point_scale(a['points'])-.7*logo_width; });
 				};
 			});
 						
@@ -484,12 +465,7 @@
 						d3.selectAll(".standing_rows")
 						  .style("background", "white")
 						  .style("color", "black");
-						
-						for (var i=1; i< 6; i+=1) {
-							d3.select('tr#St' + i.toString())
-							.style("background", line_color)
-						};
-						
+						  
 						tableRowClicked(d);  
 						
 						d3.select(this)
@@ -498,7 +474,16 @@
 			});
 			
 			rows.on("mouseout", function(d) {
-				resetColor(d);
+						d3.selectAll(".standing_rows")
+						  .style("background", "white")
+						  .style("color", "black");
+						
+						d3.selectAll('.line')
+						  .style('stroke', 'gray')
+						  .style('stroke-width', 1);
+						d3.selectAll('circle')
+						  .style('fill', 'gray')  
+						  .attr("r", 3);						
 			});
 			
 			
