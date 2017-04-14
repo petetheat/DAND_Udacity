@@ -84,16 +84,20 @@ The following metrics have been selected as \textbf{Invariant Metrics}:
 \end{labeling}
 \noindent These three metrics are not impacted by the experiment and hence one can expect similar distributions between control and experiment groups.
 \medskip
-
 \noindent The following metrics have been selected as \textbf{Evaluation Metrics}:
 \begin{labeling}{Gross conversion}
 \item [Gross conversion] Being defined as the number of user-ids to complete checkout and enroll in the free trial divided by the number of unique cookies to click the "Start free trial" button, one would expect a lower gross conversion for the experiment as for the control group. The goal of the tested change is to reduce the number of frustrated students, so you could expect that students that are likely to drop out with the current design are filtered out early and do not complete the checkout.
 \item [Retention] Similarly, you would expect an increased retention as a result of the experiment, as the number of students that complete the checkout should reduce. At the same time, the number of students to make at least one payment should remain the same.
-\item [Net conversion] Net conversion is the combination of the two previously mentioned metrics. It is expected that net conversion remains the same for both control and experiment group, as the number of students to remain enrolled past the 14-day boundary as well as the number of unique cookies to click the "Start Free Trial" Button should remain the same.
+\item [Net conversion] Net conversion is the combination of the two previously mentioned metrics. It is expected that net conversion does not decrease for both control and experiment group, as the number of students to remain enrolled past the 14-day boundary should not decrease significantly due to the experiment.
 \end{labeling}
 \noindent For each of these metrics, a practical significance boundary $d_{min}$ is defined. This indicates the minimum difference that needs to be observed between control and experiment group in order to determine whether the change is meaningful or not. This is important for the decision to whether or not launch the change.
 
-For the above given evaluations metrics, the practical significance boundaries are $d_{min} = .01$ (for gross conversion and retention) and $d_{min} = .0075$ (for net conversion)
+For the above given evaluations metrics, the practical significance boundaries are $d_{min} = .01$ (for gross conversion and retention) and $d_{min} = .0075$ (for net conversion). \medskip
+
+The following metrics have not been select as either \textbf{Invariant Metrics} or \textbf{Evaluation Metrics}:
+\begin{labeling}{[Number of User IDs}
+\item [Number of User IDs] Firstly, the number of users to enroll in the free trial are expected to change with the experiment, hence it cannot be an invariant metric. Secondly, it is not selected as an evaluation metric as the absolute number of users to enroll may vary based on external conditions, e.g. seasonal variations. Therefore it is better to use User ID as a normalized parameter, as in Gross Conversion.
+\end{labeling}
 
 \subsection{Measuring Standard Deviation}
 
@@ -313,7 +317,7 @@ This indicates that gross conversion is statistically significant whereas net co
 
 \subsubsection{Summary}
 
-Bonferroni correction was not used, as only two metrics are used. So, if gross and net conversion were completely independent, the probability of a false positive would be 9.75\%. However, both metrics are correlated (students that make a payment need to enrol first), so 9.75\% is too high. Therefore, applying a Bonferroni correction would be too conservative.
+Bonferroni correction was not used, as two metrics (gross and net conversion) are considered and the prerequisite for launching the change is a reduced gross conversion \textit{and} a net conversion that does not decrease. This means an increased risk for a Type II error (false negatives); Bonferroni correction on the other hand is intended to reduce the risk of Type I error (false positives). Hence, it is not applicable here.
 
 The effect size tests yields that gross conversion is statistically and practically significant. Net conversion is neither. The statistical significance of gross conversion is confirmed by the sign test. It also shows that net conversion is not statistically significant.
 
@@ -327,6 +331,6 @@ The initial experiment proved successful in terms of reducing the number of stud
 
 The follow-up experiment could consist in a check after the first week; if a student spends less than 5 hours, another screener is displayed to ask whether the student would like to schedule a one-to-one meeting with a coach. The idea is that this motivates the student to invest more time in the second week and subsequently continues past the free trial.\medskip
 
-As this concerns only students that have already enrolled in the free trial, the \textbf{Unit of Conversion} would be User ID. The metric for the follow-up experiment would be \textbf{Retention}, as the goal would be to see an increased number of students to make a payment.
+As this concerns only students that have already enrolled in the free trial, the \textbf{Unit of Diversion} would be User ID. User ID would also be an \textbf{Invariant Metric}, as the numbers of users to enrol in the free trial should not be impacted by the experiment. The metric for the follow-up experiment would be \textbf{Retention}, as the goal would be to see an increased number of students to make a payment.
 
 \end{document}
